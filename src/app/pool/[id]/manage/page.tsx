@@ -88,6 +88,17 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
     setTimeout(() => setInviteCopied(false), 2000);
   }
 
+  async function lockPool() {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("pools")
+      .update({ status: "locked" })
+      .eq("id", poolId)
+      .select()
+      .single();
+    if (data) setPool((prev) => prev ? { ...prev, status: data.status } : prev);
+  }
+
   async function cancelPool() {
     const supabase = createClient();
     await supabase.from("pools").update({ status: "settled" }).eq("id", poolId);
@@ -178,6 +189,38 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
               {pool.invite_code}
             </div>
           </div>
+
+          {pool.status === "open" && (
+            <div style={{ marginTop: 12 }}>
+              <button
+                className="btn-primary"
+                style={{ width: "100%" }}
+                onClick={lockPool}
+              >
+                Lock Picks
+              </button>
+              <p style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", textAlign: "center", marginTop: 6 }}>
+                Prevents players from editing picks. Do this before the tournament starts.
+              </p>
+            </div>
+          )}
+
+          {pool.status === "locked" && (
+            <div
+              style={{
+                marginTop: 12,
+                background: "rgba(201,168,76,0.08)",
+                border: "1px solid rgba(201,168,76,0.2)",
+                borderRadius: "var(--radius-lg)",
+                padding: "10px 14px",
+                fontSize: "var(--text-sm)",
+                color: "var(--gold)",
+                textAlign: "center",
+              }}
+            >
+              Picks are locked — no further changes allowed.
+            </div>
+          )}
         </div>
 
         {/* Entry Management */}
