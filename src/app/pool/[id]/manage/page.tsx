@@ -114,7 +114,7 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
 
   return (
     <>
-      <NavBar poolName={pool.name} isAdmin />
+      <NavBar poolName={pool.name} poolId={poolId} isAdmin />
       <div style={{ padding: "24px 24px 48px" }}>
         <h1 style={{ fontSize: "var(--text-2xl)", fontWeight: 800, color: "var(--cream)", marginBottom: 20 }}>
           Manage Pool

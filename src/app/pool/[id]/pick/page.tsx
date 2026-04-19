@@ -47,9 +47,8 @@ export default async function PickPlayersPage({ params }: { params: Promise<{ id
 
   if (!entry) redirect(`/join?code=${pool.invite_code}`);
 
-  // If deadline passed, show locked state
-  const deadlinePassed = new Date(pool.entry_deadline) < new Date();
-  if (deadlinePassed || pool.status === "live" || pool.status === "locked") {
+  // Lock picks only when organizer has explicitly locked/closed the pool
+  if (pool.status === "locked" || pool.status === "closed") {
     redirect(`/pool/${id}/leaderboard`);
   }
 
@@ -68,7 +67,7 @@ export default async function PickPlayersPage({ params }: { params: Promise<{ id
 
   return (
     <>
-      <NavBar poolName={pool.name} />
+      <NavBar poolName={pool.name} poolId={id} />
       <PickPlayersClient
         pool={pool as Pool & { tournament: { name: string; course: string; start_date: string } }}
         entry={entry}

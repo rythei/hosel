@@ -6,18 +6,21 @@ import { HoselLogo } from "./HoselLogo";
 
 interface NavBarProps {
   poolName?: string;
+  poolId?: string;
   isAdmin?: boolean;
   user?: { display_name: string; avatar_initials: string } | null;
 }
 
-export function NavBar({ poolName, isAdmin, user }: NavBarProps) {
+export function NavBar({ poolName, poolId, isAdmin, user }: NavBarProps) {
   const pathname = usePathname();
 
-  const navLinks = [
-    { href: "/", label: "Pools" },
-    { href: "#leaderboard", label: "Board" },
-    { href: "#picks", label: "Picks" },
-  ];
+  const navLinks = poolId
+    ? [
+        { href: "/", label: "Pools" },
+        { href: `/pool/${poolId}/leaderboard`, label: "Board" },
+        { href: `/pool/${poolId}/pick`, label: "Picks" },
+      ]
+    : [{ href: "/", label: "Pools" }];
 
   return (
     <nav
@@ -66,7 +69,7 @@ export function NavBar({ poolName, isAdmin, user }: NavBarProps) {
       {/* Center: Nav buttons */}
       <div style={{ display: "flex", gap: 4 }}>
         {navLinks.map((link) => {
-          const isActive = link.href === "/" ? pathname === "/" : pathname.includes(link.href.replace("#", ""));
+          const isActive = link.href === "/" ? pathname === "/" : pathname === link.href;
           return (
             <Link
               key={link.href}

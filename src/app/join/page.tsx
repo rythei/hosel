@@ -42,28 +42,34 @@ function JoinForm() {
     setJoining(true);
     setJoinError("");
 
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push("/auth/login"); return; }
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.push("/auth/login"); return; }
 
-    const buyinStatus = pool.require_buyin_confirmation ? "pending" : "confirmed";
+      const buyinStatus = pool.require_buyin_confirmation ? "pending" : "confirmed";
 
-    const { error } = await supabase.from("pool_entries").insert({
-      pool_id: pool.id,
-      user_id: user.id,
-      buyin_status: buyinStatus,
-    });
+      const { error } = await supabase.from("pool_entries").insert({
+        pool_id: pool.id,
+        user_id: user.id,
+        buyin_status: buyinStatus,
+      });
 
-    if (error) {
-      if (error.code === "23505") {
-        // Already in this pool — go straight to picks
+      if (error) {
+        if (error.code === "23505") {
+          router.push(`/pool/${pool.id}/pick`);
+          return;
+        }
+        console.error("Join error:", error);
+        setJoinError(`${error.message} (${error.code})`);
+        setJoining(false);
+      } else {
         router.push(`/pool/${pool.id}/pick`);
-        return;
       }
-      setJoinError(error.message);
+    } catch (err) {
+      console.error("Join exception:", err);
+      setJoinError(err instanceof Error ? err.message : String(err));
       setJoining(false);
-    } else {
-      router.push(`/pool/${pool.id}/pick`);
     }
   }
 
