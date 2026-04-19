@@ -1,0 +1,68 @@
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { NavBar } from "@/components/NavBar";
+import { LeaderboardClient } from "./LeaderboardClient";
+import { computeLeaderboard } from "@/lib/scoring";
+import type { Pool, PoolEntry, TournamentPlayer } from "@/types";
+
+export default async function LeaderboardPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const supabase = await createClient();
+
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser) redirect("/auth/login");
+
+  const { data: pool } = await supabase
+    .from("pools")
+    .select("*, tournament:tournaments(*)")
+    .eq("id", id)
+    .single<Pool & { tournament: { name: string; course: string; status: string; current_round: number | null } }>();
+
+  if (!pool) redirect("/");
+
+  const { data: entries } = await supabase
+    .from("pool_entries")
+    .select("*")
+    .eq("pool_id", id)
+    .eq("buyin_status", "confirmed");
+
+  const { data: players } = await supabase
+    .from("tournament_players")
+    .select("*")
+    .eq("tournament_id", pool.tournament_id);
+
+  // Build users map
+  const userIds = Array.from(new Set((entries ?? []).map((e) => e.user_id)));
+  const { data: users } = userIds.length > 0
+    ? await supabase.from("users").select("id, display_name").in("id", userIds)
+    : { data: [] };
+
+  const usersMap = Object.fromEntries((users ?? []).map((u: { id: string; display_name: string }) => [u.id, { display_name: u.display_name }]));
+
+  const leaderboard = computeLeaderboard(
+    (entries ?? []) as PoolEntry[],
+    (players ?? []) as TournamentPlayer[],
+    pool as Pool,
+    usersMap
+  );
+
+  const isAdmin = pool.organizer_id === authUser.id;
+
+  // Compute entry counts
+  const entryCount = (entries ?? []).length;
+  const totalPot = pool.buy_in * entryCount;
+
+  return (
+    <>
+      <NavBar poolName={pool.name} isAdmin={isAdmin} />
+      <LeaderboardClient
+        pool={pool as Pool & { tournament: { name: string; course: string; status: string; current_round: number | null } }}
+        leaderboard={leaderboard}
+        entryCount={entryCount}
+        totalPot={totalPot}
+        isAdmin={isAdmin}
+        poolId={id}
+      />
+    </>
+  );
+}
