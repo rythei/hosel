@@ -48,7 +48,7 @@ export default async function PickPlayersPage({ params }: { params: Promise<{ id
   if (!entry) redirect(`/join?code=${pool.invite_code}`);
 
   // Lock picks only when organizer has explicitly locked/closed the pool
-  if (pool.status === "locked" || pool.status === "closed") {
+  if (pool.status === "locked" || pool.status === "complete" || pool.status === "settling" || pool.status === "settled") {
     redirect(`/pool/${id}/leaderboard`);
   }
 
