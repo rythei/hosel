@@ -2,17 +2,32 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { HoselLogo } from "./HoselLogo";
 
 interface NavBarProps {
   poolName?: string;
   poolId?: string;
   isAdmin?: boolean;
-  user?: { display_name: string; avatar_initials: string } | null;
 }
 
-export function NavBar({ poolName, poolId, isAdmin, user }: NavBarProps) {
+export function NavBar({ poolName, poolId, isAdmin }: NavBarProps) {
   const pathname = usePathname();
+  const [user, setUser] = useState<{ display_name: string; avatar_initials: string } | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user: authUser } }) => {
+      if (!authUser) return;
+      supabase
+        .from("users")
+        .select("display_name, avatar_initials")
+        .eq("id", authUser.id)
+        .single()
+        .then(({ data }) => { if (data) setUser(data); });
+    });
+  }, []);
 
   const navLinks = poolId
     ? [

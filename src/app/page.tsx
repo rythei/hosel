@@ -161,7 +161,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <NavBar user={userProfile} />
+      <NavBar />
 
       {/* Hero */}
       <div
