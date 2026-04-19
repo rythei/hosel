@@ -35,7 +35,7 @@ const config: Config = {
         sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "system-ui", "sans-serif"],
       },
       maxWidth: {
-        app: "480px",
+        app: "900px",
         content: "720px",
       },
       borderRadius: {

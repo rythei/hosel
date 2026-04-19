@@ -96,19 +96,32 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* App shell — phone-width container on desktop */
+/* App shell */
 .app-container {
-  max-width: 480px;
+  max-width: 900px;
   margin: 0 auto;
   min-height: 100vh;
   position: relative;
-  border-left: 1px solid var(--border);
-  border-right: 1px solid var(--border);
 }
 
-@media (max-width: 480px) {
+@media (min-width: 900px) {
   .app-container {
-    border: none;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+}
+
+/* On desktop, bump up the type scale a touch */
+@media (min-width: 640px) {
+  :root {
+    --text-xs:   12px;
+    --text-sm:   13px;
+    --text-base: 14px;
+    --text-md:   15px;
+    --text-lg:   16px;
+    --text-xl:   18px;
+    --text-2xl:  26px;
+    --text-3xl:  40px;
   }
 }
 

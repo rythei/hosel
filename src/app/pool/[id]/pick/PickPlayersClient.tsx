@@ -268,7 +268,7 @@ export function PickPlayersClient({ pool, entry, tierGroups, tierLabels, tierCol
           left: "50%",
           transform: "translateX(-50%)",
           width: "100%",
-          maxWidth: 480,
+          maxWidth: 900,
           padding: "16px 24px",
           background: "var(--bg)",
           borderTop: "1px solid var(--border)",
