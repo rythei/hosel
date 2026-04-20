@@ -36,6 +36,48 @@ const blankPlayer = {
   tier: "1",
 };
 
+interface CsvRow {
+  name: string;
+  odds: string;
+  world_ranking: string;
+  tier: number;
+}
+
+function parseOddsToNumber(odds: string): number {
+  const n = parseInt(odds.replace(/[^-\d]/g, ""), 10);
+  if (isNaN(n)) return 9999;
+  // Convert American odds to implied probability for sorting: lower = favorite
+  return n < 0 ? n : n;
+}
+
+function assignTiers(rows: Omit<CsvRow, "tier">[], numTiers = 5): CsvRow[] {
+  const sorted = [...rows].sort((a, b) => {
+    const av = parseOddsToNumber(a.odds);
+    const bv = parseOddsToNumber(b.odds);
+    // Negatives (favorites) first, then ascending positives
+    if (av < 0 && bv >= 0) return -1;
+    if (av >= 0 && bv < 0) return 1;
+    return av - bv;
+  });
+  const chunkSize = Math.ceil(sorted.length / numTiers);
+  return sorted.map((row, i) => ({ ...row, tier: Math.min(Math.floor(i / chunkSize) + 1, numTiers) }));
+}
+
+function parseCsv(text: string): Omit<CsvRow, "tier">[] {
+  const lines = text.trim().split(/\r?\n/);
+  const header = lines[0].toLowerCase().split(",").map((h) => h.trim());
+  const nameIdx = header.findIndex((h) => h.includes("name") || h.includes("player"));
+  const oddsIdx = header.findIndex((h) => h.includes("odds"));
+  const rankIdx = header.findIndex((h) => h.includes("rank") || h.includes("ranking"));
+  if (nameIdx === -1) return [];
+  return lines.slice(1).flatMap((line) => {
+    const cols = line.split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
+    const name = cols[nameIdx] ?? "";
+    if (!name) return [];
+    return [{ name, odds: oddsIdx >= 0 ? (cols[oddsIdx] ?? "") : "", world_ranking: rankIdx >= 0 ? (cols[rankIdx] ?? "") : "" }];
+  });
+}
+
 export function AdminClient({ tournaments: initial, playersByTournament: initialPlayers }: Props) {
   const router = useRouter();
   const [tournaments, setTournaments] = useState<Tournament[]>(initial);
@@ -47,6 +89,8 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
   const [playerForm, setPlayerForm] = useState(blankPlayer);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [csvPreview, setCsvPreview] = useState<CsvRow[] | null>(null);
+  const [importing, setImporting] = useState(false);
 
   const selected = tournaments.find((t) => t.id === selectedId) ?? null;
   const players = selectedId ? (playersByTournament[selectedId] ?? []) : [];
@@ -119,6 +163,40 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
       ...prev,
       [selectedId]: (prev[selectedId] ?? []).filter((p) => p.id !== playerId),
     }));
+  }
+
+  function handleCsvFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const rows = parseCsv(text);
+      if (rows.length === 0) { setError("Could not parse CSV — ensure it has a 'player_name' column."); return; }
+      setCsvPreview(assignTiers(rows));
+    };
+    reader.readAsText(file);
+  }
+
+  async function importCsvPlayers() {
+    if (!selectedId || !csvPreview) return;
+    setImporting(true);
+    setError("");
+    const supabase = createClient();
+    const rows = csvPreview.map((row) => ({
+      tournament_id: selectedId,
+      name: row.name,
+      odds: row.odds || null,
+      world_ranking: row.world_ranking ? parseInt(row.world_ranking) : null,
+      tier: row.tier,
+      status: "active" as const,
+    }));
+    const { data, error } = await supabase.from("tournament_players").insert(rows).select();
+    if (error) { setError(error.message); setImporting(false); return; }
+    setPlayersByTournament((prev) => ({
+      ...prev,
+      [selectedId]: [...(prev[selectedId] ?? []), ...(data as TournamentPlayer[])],
+    }));
+    setCsvPreview(null);
+    setImporting(false);
   }
 
   async function updatePlayerStatus(playerId: string, status: TournamentPlayer["status"]) {
@@ -282,13 +360,31 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
               <div style={{ fontSize: "var(--text-xs)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-dim)" }}>
                 Players ({players.length})
               </div>
-              <button
-                className="btn-secondary"
-                style={{ fontSize: "var(--text-xs)", padding: "6px 12px" }}
-                onClick={() => { setShowPlayerForm((v) => !v); setError(""); }}
-              >
-                {showPlayerForm ? "Cancel" : "+ Add Player"}
-              </button>
+              <div style={{ display: "flex", gap: 6 }}>
+                <label
+                  style={{
+                    fontSize: "var(--text-xs)", padding: "6px 12px", cursor: "pointer",
+                    background: "var(--surface)", border: "1px solid var(--border)",
+                    borderRadius: "var(--radius-lg)", color: "var(--text-muted)", fontWeight: 600,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Import CSV
+                  <input
+                    type="file"
+                    accept=".csv,text/csv"
+                    style={{ display: "none" }}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) { setError(""); handleCsvFile(f); } e.target.value = ""; }}
+                  />
+                </label>
+                <button
+                  className="btn-secondary"
+                  style={{ fontSize: "var(--text-xs)", padding: "6px 12px" }}
+                  onClick={() => { setShowPlayerForm((v) => !v); setError(""); }}
+                >
+                  {showPlayerForm ? "Cancel" : "+ Add Player"}
+                </button>
+              </div>
             </div>
 
             {/* Add player form */}
@@ -322,6 +418,54 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
                 >
                   {saving ? "Adding…" : "Add Player"}
                 </button>
+              </div>
+            )}
+
+            {/* CSV preview */}
+            {csvPreview && (
+              <div className="card" style={{ padding: 16, marginBottom: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <div>
+                    <span style={{ fontSize: "var(--text-md)", fontWeight: 700, color: "var(--cream)" }}>
+                      Import {csvPreview.length} players
+                    </span>
+                    <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", marginLeft: 8 }}>
+                      Tiers auto-assigned by odds — edit before importing
+                    </span>
+                  </div>
+                  <button
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-dim)", fontSize: 18 }}
+                    onClick={() => setCsvPreview(null)}
+                  >×</button>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 320, overflowY: "auto", marginBottom: 12 }}>
+                  {/* Header */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 90px", gap: 8, padding: "0 4px 6px", fontSize: "var(--text-xs)", color: "var(--text-dim)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    <span>Name</span><span>Odds</span><span>Rank</span><span>Tier</span>
+                  </div>
+                  {csvPreview.map((row, i) => (
+                    <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 90px", gap: 8, alignItems: "center", background: "var(--surface)", borderRadius: "var(--radius-md)", padding: "6px 8px" }}>
+                      <span style={{ fontSize: "var(--text-sm)", color: "var(--cream)", fontWeight: 500 }}>{row.name}</span>
+                      <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", fontFamily: "monospace" }}>{row.odds || "—"}</span>
+                      <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>{row.world_ranking || "—"}</span>
+                      <select
+                        value={row.tier}
+                        onChange={(e) => setCsvPreview((prev) => prev ? prev.map((r, j) => j === i ? { ...r, tier: parseInt(e.target.value) } : r) : prev)}
+                        style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)", color: `var(--tier-${row.tier})`, fontSize: "var(--text-xs)", padding: "3px 6px", cursor: "pointer", fontWeight: 700 }}
+                      >
+                        {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>T{n} — {TIER_LABELS[n - 1]}</option>)}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button className="btn-primary" style={{ fontSize: "var(--text-sm)", padding: "8px 16px" }} onClick={importCsvPlayers} disabled={importing}>
+                    {importing ? "Importing…" : `Import ${csvPreview.length} Players`}
+                  </button>
+                  <button className="btn-secondary" style={{ fontSize: "var(--text-sm)", padding: "8px 16px" }} onClick={() => setCsvPreview(null)}>
+                    Cancel
+                  </button>
+                </div>
               </div>
             )}
 
