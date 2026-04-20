@@ -275,6 +275,8 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
             {entries.map((entry) => {
               const hasPicks = entry.picks && Object.keys(entry.picks).length > 0;
               const isConfirmed = entry.buyin_status === "confirmed";
+              const displayName = entry.user?.display_name ?? "Unknown";
+              const initials = entry.user?.avatar_initials ?? "?";
               return (
                 <div
                   key={entry.id}
@@ -297,13 +299,13 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
                       flexShrink: 0,
                     }}
                   >
-                    {entry.user.avatar_initials}
+                    {initials}
                   </div>
 
                   {/* Info */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: "var(--text-md)", fontWeight: 600, color: "var(--cream)" }}>
-                      {entry.user.display_name}
+                      {displayName}
                     </div>
                     <div style={{ fontSize: "var(--text-xs)", color: hasPicks ? "var(--green-light)" : "var(--gold)" }}>
                       {hasPicks ? "✓ Picks submitted" : "No picks yet"}

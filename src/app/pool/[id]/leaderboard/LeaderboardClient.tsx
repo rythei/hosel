@@ -104,7 +104,7 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
       <div
         style={{
           margin: "16px 24px",
-          background: "linear-gradient(135deg, var(--card) 0%, rgba(26,92,54,0.3) 100%)",
+          background: "linear-gradient(135deg, var(--card) 0%, color-mix(in srgb, var(--green) 12%, var(--card)) 100%)",
           border: "1px solid var(--border)",
           borderRadius: "var(--radius-xl)",
           padding: "14px 18px",

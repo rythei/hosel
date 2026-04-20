@@ -113,7 +113,7 @@ export function PickPlayersClient({ pool, entry, tierGroups, tierLabels, tierCol
               flex: 1,
               height: 3,
               borderRadius: 2,
-              background: picks[tier] ? tierColors[tier] : "rgba(90,102,96,0.25)",
+              background: picks[tier] ? tierColors[tier] : "var(--border)",
               transition: "background 0.3s",
             }}
           />
