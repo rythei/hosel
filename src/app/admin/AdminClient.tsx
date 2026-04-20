@@ -91,6 +91,7 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
   const [error, setError] = useState("");
   const [csvPreview, setCsvPreview] = useState<CsvRow[] | null>(null);
   const [importing, setImporting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const selected = tournaments.find((t) => t.id === selectedId) ?? null;
   const players = selectedId ? (playersByTournament[selectedId] ?? []) : [];
@@ -126,6 +127,15 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
     const supabase = createClient();
     await supabase.from("tournaments").update({ status }).eq("id", tournamentId);
     setTournaments((prev) => prev.map((t) => t.id === tournamentId ? { ...t, status } : t));
+  }
+
+  async function deleteTournament(tournamentId: string) {
+    const supabase = createClient();
+    const { error } = await supabase.from("tournaments").delete().eq("id", tournamentId);
+    if (error) { setError(error.message); return; }
+    const remaining = tournaments.filter((t) => t.id !== tournamentId);
+    setTournaments(remaining);
+    setSelectedId(remaining[0]?.id ?? null);
   }
 
   async function savePlayer() {
@@ -291,7 +301,7 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
             {tournaments.map((t) => (
               <button
                 key={t.id}
-                onClick={() => setSelectedId(t.id)}
+                onClick={() => { setSelectedId(t.id); setConfirmDelete(false); }}
                 style={{
                   textAlign: "left",
                   background: selectedId === t.id ? "var(--card-hover)" : "var(--card)",
@@ -335,7 +345,7 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
                     <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginTop: 4, fontFamily: "monospace" }}>ESPN ID: {selected.external_id}</p>
                   )}
                 </div>
-                <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                <div style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
                   {STATUS_OPTIONS.map((s) => (
                     <button
                       key={s}
@@ -351,6 +361,43 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
                       {s}
                     </button>
                   ))}
+                  <div style={{ width: 1, height: 20, background: "var(--border)", margin: "0 2px" }} />
+                  {!confirmDelete ? (
+                    <button
+                      onClick={() => setConfirmDelete(true)}
+                      style={{
+                        fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 99,
+                        cursor: "pointer", border: "1px solid rgba(144,64,64,0.3)",
+                        background: "rgba(144,64,64,0.06)", color: "var(--red)",
+                      }}
+                    >
+                      Delete
+                    </button>
+                  ) : (
+                    <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                      <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Sure?</span>
+                      <button
+                        onClick={() => { setConfirmDelete(false); deleteTournament(selected.id); }}
+                        style={{
+                          fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 99,
+                          cursor: "pointer", border: "none",
+                          background: "var(--red)", color: "white",
+                        }}
+                      >
+                        Yes, delete
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(false)}
+                        style={{
+                          fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 99,
+                          cursor: "pointer", border: "1px solid var(--border)",
+                          background: "var(--surface)", color: "var(--text-muted)",
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
