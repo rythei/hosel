@@ -190,7 +190,7 @@ export default function CreatePoolPage() {
                       width: "100%",
                       textAlign: "left",
                       border: selectedTournament === t.id ? "1.5px solid var(--green)" : "1.5px solid var(--border)",
-                      background: selectedTournament === t.id ? "rgba(45,138,84,0.08)" : "var(--card)",
+                      background: selectedTournament === t.id ? "rgba(40,94,58,0.08)" : "var(--card)",
                     }}
                   >
                     <div
@@ -285,7 +285,7 @@ export default function CreatePoolPage() {
                       padding: "10px 0",
                       borderRadius: "var(--radius-xl)",
                       border: numTiers === n ? "1.5px solid var(--green)" : "1.5px solid var(--border)",
-                      background: numTiers === n ? "rgba(45,138,84,0.08)" : "var(--card)",
+                      background: numTiers === n ? "rgba(40,94,58,0.08)" : "var(--card)",
                       color: numTiers === n ? "var(--cream)" : "var(--text-muted)",
                       fontWeight: 700,
                       fontSize: "var(--text-md)",
@@ -313,7 +313,7 @@ export default function CreatePoolPage() {
                       width: "100%",
                       textAlign: "left",
                       border: scoringMethod === opt.value ? "1.5px solid var(--green)" : "1.5px solid var(--border)",
-                      background: scoringMethod === opt.value ? "rgba(45,138,84,0.08)" : "var(--card)",
+                      background: scoringMethod === opt.value ? "rgba(40,94,58,0.08)" : "var(--card)",
                     }}
                   >
                     <div
@@ -390,7 +390,7 @@ export default function CreatePoolPage() {
                     display: "flex",
                     justifyContent: "space-between",
                     padding: "12px 0 0",
-                    borderTop: "1px solid rgba(201,168,76,0.2)",
+                    borderTop: "1px solid rgba(138,96,48,0.2)",
                   }}
                 >
                   <span style={{ color: "var(--gold)", fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>

@@ -88,9 +88,9 @@ export function PickPlayersClient({ pool, entry, tierGroups, tierLabels, tierCol
             fontWeight: 700,
             padding: "4px 10px",
             borderRadius: "var(--radius-full)",
-            background: allPicked ? "rgba(58,175,106,0.15)" : "rgba(201,168,76,0.15)",
+            background: allPicked ? "rgba(52,122,74,0.15)" : "rgba(138,96,48,0.15)",
             color: allPicked ? "var(--green-light)" : "var(--gold)",
-            border: `1px solid ${allPicked ? "rgba(58,175,106,0.3)" : "rgba(201,168,76,0.3)"}`,
+            border: `1px solid ${allPicked ? "rgba(52,122,74,0.3)" : "rgba(138,96,48,0.3)"}`,
           }}
         >
           {totalPicks}/{numTiers}
@@ -124,8 +124,8 @@ export function PickPlayersClient({ pool, entry, tierGroups, tierLabels, tierCol
       {pendingBuyin && (
         <div
           style={{
-            background: "rgba(201,168,76,0.08)",
-            border: "1px solid rgba(201,168,76,0.25)",
+            background: "rgba(138,96,48,0.08)",
+            border: "1px solid rgba(138,96,48,0.25)",
             borderRadius: "var(--radius-lg)",
             padding: "10px 14px",
             marginBottom: 20,

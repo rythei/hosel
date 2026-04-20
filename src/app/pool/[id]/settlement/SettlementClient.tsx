@@ -80,8 +80,8 @@ export function SettlementClient({ pool, payouts: initialPayouts, usersMap, isAd
       {overallWinner && (
         <div
           style={{
-            background: "linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.05))",
-            border: "1px solid rgba(201,168,76,0.3)",
+            background: "linear-gradient(135deg, rgba(138,96,48,0.1), rgba(138,96,48,0.05))",
+            border: "1px solid rgba(138,96,48,0.3)",
             borderRadius: "var(--radius-2xl)",
             padding: "24px",
             textAlign: "center",
@@ -103,9 +103,9 @@ export function SettlementClient({ pool, payouts: initialPayouts, usersMap, isAd
           <span
             className="badge"
             style={{
-              background: allDistributed ? "rgba(58,175,106,0.12)" : "rgba(201,168,76,0.12)",
+              background: allDistributed ? "rgba(52,122,74,0.12)" : "rgba(138,96,48,0.12)",
               color: allDistributed ? "var(--green-light)" : "var(--gold)",
-              border: `1px solid ${allDistributed ? "rgba(58,175,106,0.25)" : "rgba(201,168,76,0.25)"}`,
+              border: `1px solid ${allDistributed ? "rgba(52,122,74,0.25)" : "rgba(138,96,48,0.25)"}`,
             }}
           >
             {allDistributed ? "Settled" : "Awaiting Distribution"}
@@ -160,9 +160,9 @@ export function SettlementClient({ pool, payouts: initialPayouts, usersMap, isAd
               <span
                 className="badge"
                 style={{
-                  background: p.is_distributed ? "rgba(58,175,106,0.12)" : "rgba(201,168,76,0.12)",
+                  background: p.is_distributed ? "rgba(52,122,74,0.12)" : "rgba(138,96,48,0.12)",
                   color: p.is_distributed ? "var(--green-light)" : "var(--gold)",
-                  border: `1px solid ${p.is_distributed ? "rgba(58,175,106,0.25)" : "rgba(201,168,76,0.25)"}`,
+                  border: `1px solid ${p.is_distributed ? "rgba(52,122,74,0.25)" : "rgba(138,96,48,0.25)"}`,
                 }}
               >
                 {p.is_distributed ? "Paid ✓" : "Pending"}
@@ -222,8 +222,8 @@ export function SettlementClient({ pool, payouts: initialPayouts, usersMap, isAd
                 gap: 12,
                 padding: "10px 12px",
                 borderRadius: "var(--radius-lg)",
-                background: p.is_distributed ? "rgba(58,175,106,0.05)" : "var(--surface)",
-                border: `1px solid ${p.is_distributed ? "rgba(58,175,106,0.2)" : "var(--border)"}`,
+                background: p.is_distributed ? "rgba(52,122,74,0.05)" : "var(--surface)",
+                border: `1px solid ${p.is_distributed ? "rgba(52,122,74,0.2)" : "var(--border)"}`,
                 marginBottom: 8,
               }}
             >
@@ -254,8 +254,8 @@ export function SettlementClient({ pool, payouts: initialPayouts, usersMap, isAd
           {allDistributed && (
             <div
               style={{
-                background: "rgba(58,175,106,0.08)",
-                border: "1px solid rgba(58,175,106,0.25)",
+                background: "rgba(52,122,74,0.08)",
+                border: "1px solid rgba(52,122,74,0.25)",
                 borderRadius: "var(--radius-lg)",
                 padding: "16px",
                 textAlign: "center",

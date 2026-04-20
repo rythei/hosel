@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hosel — Design Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f0ede8;
+  color: #1a1a1a;
+  padding: 40px 24px;
+}
+
+h1 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.concepts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.concept {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 24px rgba(0,0,0,0.10);
+}
+
+.concept-label {
+  padding: 12px 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: #f0ede8;
+  color: #888;
+  border-bottom: 1px solid #e0ddd8;
+}
+
+/* ─────────────────────────────────────────────
+   THEME A — Warm Slate (like a private members club)
+   Dark charcoal, warm off-whites, muted brass
+   ───────────────────────────────────────────── */
+.theme-a {
+  --bg:          #16140f;
+  --surface:     #1e1b14;
+  --card:        #252118;
+  --card-hover:  #2c2820;
+  --border:      #353020;
+  --green:       #5a8a5e;
+  --green-light: #7aaa7e;
+  --green-dark:  #3a5e3e;
+  --gold:        #b8924a;
+  --gold-light:  #d4a85c;
+  --chip:        #c9a055;
+  --text:        #ccc6b8;
+  --text-muted:  #7a7468;
+  --text-dim:    #4a4640;
+  --cream:       #e8e0d0;
+  --red:         #b05050;
+  --tier-1:      #b8924a;
+  --tier-2:      #5a8a5e;
+  --tier-3:      #5a7ea8;
+  --tier-4:      #8a6aaa;
+  --tier-5:      #a87060;
+}
+
+/* ─────────────────────────────────────────────
+   THEME B — Cool Ink (editorial, WSJ vibes)
+   True black, clean cream, ink green accent
+   ───────────────────────────────────────────── */
+.theme-b {
+  --bg:          #0d0d0d;
+  --surface:     #141414;
+  --card:        #1a1a1a;
+  --card-hover:  #202020;
+  --border:      #282828;
+  --green:       #3d7a52;
+  --green-light: #52a06e;
+  --green-dark:  #2a5438;
+  --gold:        #c4983a;
+  --gold-light:  #d8ae52;
+  --chip:        #c4983a;
+  --text:        #c8c8c8;
+  --text-muted:  #707070;
+  --text-dim:    #404040;
+  --cream:       #f0f0ee;
+  --red:         #c05050;
+  --tier-1:      #c4983a;
+  --tier-2:      #52a06e;
+  --tier-3:      #5888b8;
+  --tier-4:      #9070c0;
+  --tier-5:      #b87860;
+}
+
+/* ─────────────────────────────────────────────
+   THEME C — Navy Club (Augusta, Ryder Cup energy)
+   Deep navy, warm brass, cream white
+   ───────────────────────────────────────────── */
+.theme-c {
+  --bg:          #0e1118;
+  --surface:     #141820;
+  --card:        #1a2030;
+  --card-hover:  #202840;
+  --border:      #2a3348;
+  --green:       #4a8060;
+  --green-light: #62a87c;
+  --green-dark:  #2e5040;
+  --gold:        #c8a050;
+  --gold-light:  #dab868;
+  --chip:        #c8a050;
+  --text:        #b8c0cc;
+  --text-muted:  #6878a0;
+  --text-dim:    #3a4460;
+  --cream:       #e8eaf0;
+  --red:         #c05858;
+  --tier-1:      #c8a050;
+  --tier-2:      #4a9870;
+  --tier-3:      #5888c8;
+  --tier-4:      #8868c0;
+  --tier-5:      #c07868;
+}
+
+/* ─────────────────────────────────────────────
+   THEME D — Stone & Moss (most refined, low contrast)
+   Warm stone bg, mossy sage, barely-there borders
+   ───────────────────────────────────────────── */
+.theme-d {
+  --bg:          #181714;
+  --surface:     #201e1a;
+  --card:        #272420;
+  --card-hover:  #2e2b27;
+  --border:      #353028;
+  --green:       #6a8c68;
+  --green-light: #88aa86;
+  --green-dark:  #4a6448;
+  --gold:        #a8885a;
+  --gold-light:  #c0a070;
+  --chip:        #b09060;
+  --text:        #b8b0a4;
+  --text-muted:  #706860;
+  --text-dim:    #484038;
+  --cream:       #ddd5c8;
+  --red:         #a06060;
+  --tier-1:      #a8885a;
+  --tier-2:      #6a8c68;
+  --tier-3:      #6888a8;
+  --tier-4:      #887098;
+  --tier-5:      #a87868;
+}
+
+/* ─── Shared component styles (scoped via parent class) ─── */
+
+.theme-shell {
+  background: var(--bg);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.t-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.t-logo {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.t-logo-dot {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+.t-logo-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green), var(--green-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.t-nav-links {
+  display: flex;
+  gap: 2px;
+}
+
+.t-nav-link {
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.t-nav-link.active {
+  background: var(--card);
+  color: var(--cream);
+}
+
+.t-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green), var(--green-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+}
+
+.t-body {
+  padding: 24px 20px;
+}
+
+.t-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+/* Pool card */
+.t-pool-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.t-pool-card:hover { background: var(--card-hover); }
+
+.t-pool-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.t-pool-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--cream);
+}
+
+.t-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.t-badge-live {
+  background: rgba(0,0,0,0);
+  color: var(--green-light);
+  border-color: rgba(90,160,100,0.3);
+}
+
+.t-badge-open {
+  color: var(--gold);
+  border-color: rgba(180,140,60,0.3);
+}
+
+.t-pool-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.t-pool-footer {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.t-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--chip);
+}
+
+.t-chip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--chip);
+}
+
+/* Divider */
+.t-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+
+/* Player pick row */
+.t-pick-row {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 14px;
+  margin-bottom: 7px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.t-pick-row.selected {
+  border-color: var(--tier-1);
+  background: color-mix(in srgb, var(--tier-1) 10%, var(--card));
+}
+
+.t-pick-row.selected-2 {
+  border-color: var(--tier-2);
+  background: color-mix(in srgb, var(--tier-2) 10%, var(--card));
+}
+
+.t-radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--text-dim);
+  flex-shrink: 0;
+}
+
+.t-radio.checked {
+  background: var(--tier-1);
+  border-color: var(--tier-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 10px;
+}
+
+.t-radio.checked-2 {
+  background: var(--tier-2);
+  border-color: var(--tier-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 10px;
+}
+
+.t-player-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cream);
+}
+
+.t-player-rank {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.t-odds {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.t-odds.selected { color: var(--tier-1); }
+.t-odds.selected-2 { color: var(--tier-2); }
+
+/* Tier label */
+.t-tier-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+  margin-top: 18px;
+}
+
+.t-tier-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.t-tier-text {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cream);
+}
+
+.t-tier-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Button */
+.t-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  margin-top: 4px;
+  background: linear-gradient(135deg, var(--green), var(--green-dark));
+  color: white;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+}
+
+/* Leaderboard row */
+.t-lb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.t-lb-rank {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dim);
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.t-lb-rank.top { color: var(--gold); }
+
+.t-lb-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cream);
+}
+
+.t-lb-picks {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.t-lb-score {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--green-light);
+  font-variant-numeric: tabular-nums;
+}
+
+.t-lb-score.neg { color: var(--green-light); }
+.t-lb-score.neutral { color: var(--text-muted); }
+
+</style>
+</head>
+<body>
+
+<h1>Hosel — Design Concepts</h1>
+
+<div class="concepts">
+
+  <!-- ──── THEME A: Warm Slate ──── -->
+  <div class="concept">
+    <div class="concept-label">A — Warm Slate &nbsp;·&nbsp; Dark charcoal, muted brass</div>
+    <div class="theme-shell theme-a">
+      <!-- Nav -->
+      <div class="t-nav">
+        <div class="t-logo">
+          <div class="t-logo-icon">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <circle cx="6" cy="6" r="5" stroke="white" stroke-width="1.5"/>
+              <path d="M4 6h4M6 4v4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          hosel<span class="t-logo-dot">.io</span>
+        </div>
+        <div class="t-nav-links">
+          <div class="t-nav-link active">Pools</div>
+          <div class="t-nav-link">Board</div>
+          <div class="t-nav-link">Picks</div>
+        </div>
+        <div class="t-avatar">RT</div>
+      </div>
+
+      <!-- Body: Home screen -->
+      <div class="t-body">
+        <div class="t-section-label">Your Pools</div>
+
+        <div class="t-pool-card">
+          <div class="t-pool-card-top">
+            <div class="t-pool-name">Sunday Funday</div>
+            <div class="t-badge t-badge-live">● Live</div>
+          </div>
+          <div class="t-pool-meta">PGA Championship · Quail Hollow</div>
+          <div class="t-pool-footer">
+            <div class="t-chip"><div class="t-chip-dot"></div>50 tokens</div>
+            <div style="font-size:12px;color:var(--text-dim)">8 entries</div>
+            <div style="font-size:12px;color:var(--green-light);font-weight:600">Picks in ✓</div>
+          </div>
+        </div>
+
+        <div class="t-pool-card">
+          <div class="t-pool-card-top">
+            <div class="t-pool-name">The Boys Major</div>
+            <div class="t-badge t-badge-open">Open</div>
+          </div>
+          <div class="t-pool-meta">US Open · Oakmont CC</div>
+          <div class="t-pool-footer">
+            <div class="t-chip"><div class="t-chip-dot"></div>100 tokens</div>
+            <div style="font-size:12px;color:var(--text-dim)">3 entries</div>
+            <div style="font-size:12px;color:var(--gold);font-weight:600">No picks yet</div>
+          </div>
+        </div>
+
+        <div class="t-divider"></div>
+        <div class="t-section-label">Leaderboard Preview</div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:4px 14px;">
+          <div class="t-lb-row">
+            <div class="t-lb-rank top">1</div>
+            <div><div class="t-lb-name">Ryan T.</div><div class="t-lb-picks">Scheffler · Rahm · Henley · Scott · Woods</div></div>
+            <div class="t-lb-score neg">−42</div>
+          </div>
+          <div class="t-lb-row">
+            <div class="t-lb-rank top">2</div>
+            <div><div class="t-lb-name">Tom M.</div><div class="t-lb-picks">McIlroy · Åberg · Harman · Bradley · Griffin</div></div>
+            <div class="t-lb-score neg">−38</div>
+          </div>
+          <div class="t-lb-row" style="border-bottom:none">
+            <div class="t-lb-rank">3</div>
+            <div><div class="t-lb-name">Jake W.</div><div class="t-lb-picks">Hovland · Clark · Conners · Young · Bhatia</div></div>
+            <div class="t-lb-score neutral">−31</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──── THEME B: Cool Ink ──── -->
+  <div class="concept">
+    <div class="concept-label">B — Cool Ink &nbsp;·&nbsp; True black, editorial feel</div>
+    <div class="theme-shell theme-b">
+      <div class="t-nav">
+        <div class="t-logo">
+          <div class="t-logo-icon">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <circle cx="6" cy="6" r="5" stroke="white" stroke-width="1.5"/>
+              <path d="M4 6h4M6 4v4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          hosel<span class="t-logo-dot">.io</span>
+        </div>
+        <div class="t-nav-links">
+          <div class="t-nav-link">Pools</div>
+          <div class="t-nav-link active">Picks</div>
+          <div class="t-nav-link">Board</div>
+        </div>
+        <div class="t-avatar">RT</div>
+      </div>
+
+      <!-- Body: Picks screen -->
+      <div class="t-body">
+        <div style="font-size:20px;font-weight:800;color:var(--cream);margin-bottom:4px">Make Your Picks</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:20px">PGA Championship · 1 per tier · 5 tiers</div>
+
+        <!-- Progress -->
+        <div style="display:flex;gap:5px;margin-bottom:22px">
+          <div style="flex:1;height:3px;border-radius:2px;background:var(--tier-1)"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:var(--tier-2)"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:var(--border)"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:var(--border)"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:var(--border)"></div>
+        </div>
+
+        <div class="t-tier-label">
+          <div class="t-tier-dot" style="background:var(--tier-1)"></div>
+          <span class="t-tier-text">Tier 1</span>
+          <span class="t-tier-sub">— Elite</span>
+        </div>
+
+        <div class="t-pick-row selected">
+          <div class="t-radio checked">✓</div>
+          <div><div class="t-player-name">Scottie Scheffler</div><div class="t-player-rank">World #1</div></div>
+          <div class="t-odds selected">+450</div>
+        </div>
+        <div class="t-pick-row">
+          <div class="t-radio"></div>
+          <div><div class="t-player-name">Rory McIlroy</div><div class="t-player-rank">World #2</div></div>
+          <div class="t-odds">+700</div>
+        </div>
+        <div class="t-pick-row">
+          <div class="t-radio"></div>
+          <div><div class="t-player-name">Xander Schauffele</div><div class="t-player-rank">World #3</div></div>
+          <div class="t-odds">+900</div>
+        </div>
+
+        <div class="t-tier-label">
+          <div class="t-tier-dot" style="background:var(--tier-2)"></div>
+          <span class="t-tier-text">Tier 2</span>
+          <span class="t-tier-sub">— Contenders</span>
+        </div>
+
+        <div class="t-pick-row selected-2">
+          <div class="t-radio checked-2">✓</div>
+          <div><div class="t-player-name">Jon Rahm</div><div class="t-player-rank">World #6</div></div>
+          <div class="t-odds selected-2">+1400</div>
+        </div>
+        <div class="t-pick-row">
+          <div class="t-radio"></div>
+          <div><div class="t-player-name">Ludvig Åberg</div><div class="t-player-rank">World #7</div></div>
+          <div class="t-odds">+1600</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──── THEME C: Navy Club ──── -->
+  <div class="concept">
+    <div class="concept-label">C — Navy Club &nbsp;·&nbsp; Deep blue, warm brass</div>
+    <div class="theme-shell theme-c">
+      <div class="t-nav">
+        <div class="t-logo">
+          <div class="t-logo-icon">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <circle cx="6" cy="6" r="5" stroke="white" stroke-width="1.5"/>
+              <path d="M4 6h4M6 4v4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          hosel<span class="t-logo-dot">.io</span>
+        </div>
+        <div class="t-nav-links">
+          <div class="t-nav-link">Pools</div>
+          <div class="t-nav-link">Picks</div>
+          <div class="t-nav-link active">Board</div>
+        </div>
+        <div class="t-avatar">RT</div>
+      </div>
+
+      <div class="t-body">
+        <div style="font-size:20px;font-weight:800;color:var(--cream);margin-bottom:2px">Leaderboard</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:20px">Sunday Funday · PGA Championship · Rd 3</div>
+
+        <!-- Tabs -->
+        <div style="display:flex;background:var(--surface);border-radius:8px;padding:3px;gap:2px;margin-bottom:20px">
+          <div style="flex:1;padding:7px;border-radius:6px;font-size:13px;font-weight:600;text-align:center;background:var(--card);color:var(--cream)">Overall</div>
+          <div style="flex:1;padding:7px;border-radius:6px;font-size:13px;font-weight:500;text-align:center;color:var(--text-muted)">R1</div>
+          <div style="flex:1;padding:7px;border-radius:6px;font-size:13px;font-weight:500;text-align:center;color:var(--text-muted)">R2</div>
+          <div style="flex:1;padding:7px;border-radius:6px;font-size:13px;font-weight:500;text-align:center;color:var(--text-muted)">R3</div>
+        </div>
+
+        <!-- Pot banner -->
+        <div style="background:color-mix(in srgb, var(--gold) 10%, var(--surface));border:1px solid color-mix(in srgb, var(--gold) 25%, transparent);border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:12px;color:var(--text-muted)">Total Pot</div>
+          <div style="font-size:18px;font-weight:800;color:var(--gold)">400 ◈</div>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <!-- #1 highlighted -->
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;background:color-mix(in srgb, var(--gold) 8%, var(--card));border-bottom:1px solid var(--border)">
+            <div style="font-size:13px;font-weight:800;color:var(--gold);width:20px">1</div>
+            <div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--cream)">Ryan T.</div><div style="font-size:11px;color:var(--text-muted);margin-top:1px">Scheffler · Rahm · Henley · Scott · Woods</div></div>
+            <div style="font-size:16px;font-weight:800;color:var(--green-light)">−42</div>
+          </div>
+          <div class="t-lb-row" style="padding:11px 16px">
+            <div class="t-lb-rank top">2</div>
+            <div style="flex:1"><div class="t-lb-name">Tom M.</div><div class="t-lb-picks">McIlroy · Åberg · Harman · Bradley · Griffin</div></div>
+            <div class="t-lb-score neg">−38</div>
+          </div>
+          <div class="t-lb-row" style="padding:11px 16px">
+            <div class="t-lb-rank">3</div>
+            <div style="flex:1"><div class="t-lb-name">Jake W.</div><div class="t-lb-picks">Hovland · Clark · Conners · Young · Bhatia</div></div>
+            <div class="t-lb-score neutral">−31</div>
+          </div>
+          <div class="t-lb-row" style="padding:11px 16px;border-bottom:none">
+            <div class="t-lb-rank">4</div>
+            <div style="flex:1"><div class="t-lb-name">Chris P.</div><div class="t-lb-picks">Morikawa · Fleetwood · Fitzpatrick · Matsuyama · Novak</div></div>
+            <div class="t-lb-score neutral">−28</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──── THEME D: Stone & Moss ──── -->
+  <div class="concept">
+    <div class="concept-label">D — Stone & Moss &nbsp;·&nbsp; Warmest, most understated</div>
+    <div class="theme-shell theme-d">
+      <div class="t-nav">
+        <div class="t-logo">
+          <div class="t-logo-icon">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <circle cx="6" cy="6" r="5" stroke="white" stroke-width="1.5"/>
+              <path d="M4 6h4M6 4v4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          hosel<span class="t-logo-dot">.io</span>
+        </div>
+        <div class="t-nav-links">
+          <div class="t-nav-link active">Pools</div>
+          <div class="t-nav-link">Board</div>
+          <div class="t-nav-link">Picks</div>
+        </div>
+        <div class="t-avatar">RT</div>
+      </div>
+
+      <div class="t-body">
+        <!-- Join pool view -->
+        <div style="font-size:20px;font-weight:800;color:var(--cream);margin-bottom:4px">Join a Pool</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:22px">Enter the 6-character code from your invite.</div>
+
+        <div style="display:flex;gap:8px;margin-bottom:20px">
+          <div style="flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:12px 16px;font-size:20px;font-weight:700;color:var(--cream);font-family:monospace;letter-spacing:6px">ABC123</div>
+          <div style="background:linear-gradient(135deg,var(--green),var(--green-dark));color:white;border:none;padding:12px 18px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">Find</div>
+        </div>
+
+        <!-- Pool found card -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:0">
+          <div style="font-size:16px;font-weight:800;color:var(--cream);margin-bottom:2px">Sunday Funday</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">PGA Championship · Quail Hollow</div>
+
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Buy-in</span><span style="color:var(--cream);font-weight:600">50 ◈</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Tiers</span><span style="color:var(--cream);font-weight:600">5 tiers</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Scoring</span><span style="color:var(--cream);font-weight:600">Best 3 of 5</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Entries</span><span style="color:var(--cream);font-weight:600">5 / 20</span></div>
+          </div>
+
+          <div style="background:color-mix(in srgb,var(--text-dim) 15%,transparent);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text-muted)">
+            By joining you agree to a 50 ◈ buy-in. Settle up with your organizer directly.
+          </div>
+
+          <div class="t-btn">Join Pool & Make Picks</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center;margin-top:48px;font-size:12px;color:#999;font-family:Inter,sans-serif">
+  Reply with A, B, C, D — or describe what you want to mix/tweak.
+</div>
+
+</body>
+</html>

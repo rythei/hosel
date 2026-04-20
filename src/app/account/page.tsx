@@ -128,8 +128,8 @@ export default async function AccountPage() {
               textDecoration: "none",
               padding: "6px 12px",
               borderRadius: "var(--radius-md)",
-              border: "1px solid rgba(58,175,106,0.3)",
-              background: "rgba(58,175,106,0.08)",
+              border: "1px solid rgba(52,122,74,0.3)",
+              background: "rgba(52,122,74,0.08)",
             }}
           >
             + New Pool
@@ -171,9 +171,9 @@ export default async function AccountPage() {
                           className="badge"
                           style={{
                             fontSize: 10,
-                            background: "rgba(45,138,84,0.12)",
+                            background: "rgba(40,94,58,0.12)",
                             color: "var(--green-light)",
-                            border: "1px solid rgba(45,138,84,0.25)",
+                            border: "1px solid rgba(40,94,58,0.25)",
                           }}
                         >
                           Organizer

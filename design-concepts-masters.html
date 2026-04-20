@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hosel — Masters Palette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #dedad4;
+  padding: 40px 24px 60px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 36px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.concept { border-radius: 14px; overflow: hidden; box-shadow: 0 2px 24px rgba(0,0,0,0.12); }
+
+.concept-label {
+  padding: 11px 18px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  background: #dedad4; color: #888; border-bottom: 1px solid #ccc8c2;
+}
+
+/* ═══════════════════════════════════════════
+   M1 — Augusta Classic
+   Off-white, deep Augusta green, warm umber
+   ═══════════════════════════════════════════ */
+.m1 {
+  --bg:          #f5f2eb;
+  --surface:     #edeae2;
+  --card:        #e8e4db;
+  --card-hover:  #e0dcd2;
+  --border:      #d0cbbf;
+  --green:       #1f5c35;
+  --green-light: #2a7444;
+  --green-dark:  #163d24;
+  --gold:        #7a5828;
+  --gold-light:  #9a7038;
+  --chip:        #8a6430;
+  --text:        #2a2520;
+  --text-muted:  #7a7268;
+  --text-dim:    #b0a898;
+  --cream:       #1a1510;
+  --red:         #8c3c3c;
+  --tier-1:      #7a5828;
+  --tier-2:      #1f5c35;
+  --tier-3:      #3a5878;
+  --tier-4:      #6a4870;
+  --tier-5:      #8a5040;
+}
+
+/* ═══════════════════════════════════════════
+   M2 — Clubhouse
+   Creamier white, slightly warmer green,
+   richer leather-brown accent
+   ═══════════════════════════════════════════ */
+.m2 {
+  --bg:          #faf7f0;
+  --surface:     #f2ede4;
+  --card:        #ece7dc;
+  --card-hover:  #e4dfd3;
+  --border:      #d4cec4;
+  --green:       #285e3a;
+  --green-light: #347a4a;
+  --green-dark:  #1a4028;
+  --gold:        #8a6030;
+  --gold-light:  #aa7840;
+  --chip:        #9a6c38;
+  --text:        #28221c;
+  --text-muted:  #7c746a;
+  --text-dim:    #b4aca2;
+  --cream:       #18120c;
+  --red:         #904040;
+  --tier-1:      #8a6030;
+  --tier-2:      #285e3a;
+  --tier-3:      #3c5a80;
+  --tier-4:      #6c4878;
+  --tier-5:      #905048;
+}
+
+/* ═══════════════════════════════════════════
+   M3 — Sunday Green (dark mode)
+   Deep pine green surface, off-white text,
+   warm amber/brown highlights
+   ═══════════════════════════════════════════ */
+.m3 {
+  --bg:          #0f1f14;
+  --surface:     #152a1a;
+  --card:        #1c3522;
+  --card-hover:  #22402a;
+  --border:      #2a4c32;
+  --green:       #3a8050;
+  --green-light: #50a468;
+  --green-dark:  #265838;
+  --gold:        #c09050;
+  --gold-light:  #d8a868;
+  --chip:        #c89858;
+  --text:        #c0c8bc;
+  --text-muted:  #6a8070;
+  --text-dim:    #3a5040;
+  --cream:       #f0ece4;
+  --red:         #a85050;
+  --tier-1:      #c09050;
+  --tier-2:      #50a468;
+  --tier-3:      #5888b0;
+  --tier-4:      #9070b0;
+  --tier-5:      #b07868;
+}
+
+/* ═══════════════════════════════════════════
+   M4 — Amen Corner (dark mode)
+   Very deep forest, pine green darks,
+   brown-amber gold — most dramatic
+   ═══════════════════════════════════════════ */
+.m4 {
+  --bg:          #090f0b;
+  --surface:     #0e1810;
+  --card:        #141f16;
+  --card-hover:  #1a281c;
+  --border:      #20321c;
+  --green:       #2e7040;
+  --green-light: #409054;
+  --green-dark:  #1e4e2c;
+  --gold:        #b88040;
+  --gold-light:  #d09a58;
+  --chip:        #c08848;
+  --text:        #b0bca8;
+  --text-muted:  #587060;
+  --text-dim:    #30403a;
+  --cream:       #ede8e0;
+  --red:         #a04848;
+  --tier-1:      #b88040;
+  --tier-2:      #409054;
+  --tier-3:      #4878a0;
+  --tier-4:      #806898;
+  --tier-5:      #a06858;
+}
+
+/* ═══════════════════════════════════════════
+   M5 — Magnolia Lane
+   Warm white, very muted sage green,
+   deep umber — softest, most restrained
+   ═══════════════════════════════════════════ */
+.m5 {
+  --bg:          #f8f5ee;
+  --surface:     #efebe3;
+  --card:        #e8e3d9;
+  --card-hover:  #dfd9ce;
+  --border:      #cdc7ba;
+  --green:       #3d6848;
+  --green-light: #508458;
+  --green-dark:  #2a4c34;
+  --gold:        #7e5c2c;
+  --gold-light:  #9e7840;
+  --chip:        #8c6834;
+  --text:        #2c2820;
+  --text-muted:  #7e766c;
+  --text-dim:    #b4ada4;
+  --cream:       #1a1610;
+  --red:         #884040;
+  --tier-1:      #7e5c2c;
+  --tier-2:      #3d6848;
+  --tier-3:      #3a5878;
+  --tier-4:      #644870;
+  --tier-5:      #885048;
+}
+
+/* ─── Shared components ─── */
+.shell { background: var(--bg); font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+
+.nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 13px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 16px; font-weight: 700; color: var(--cream);
+}
+
+.logo-icon {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--green), var(--green-dark));
+  display: flex; align-items: center; justify-content: center;
+}
+
+.logo-dim { font-weight: 400; font-size: 12px; color: var(--text-dim); }
+
+.nav-links { display: flex; gap: 2px; }
+
+.nav-link {
+  padding: 5px 10px; border-radius: 5px;
+  font-size: 12px; font-weight: 500; color: var(--text-muted);
+}
+
+.nav-link.on { background: var(--card); color: var(--cream); }
+
+.avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--green), var(--green-dark));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white;
+}
+
+.body { padding: 22px 18px; }
+
+.eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px;
+}
+
+.page-title { font-size: 19px; font-weight: 800; color: var(--cream); margin-bottom: 3px; }
+.page-sub   { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+
+/* Pool card */
+.pool-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 15px;
+  margin-bottom: 8px;
+}
+
+.pool-name { font-size: 14px; font-weight: 700; color: var(--cream); }
+.pool-meta { font-size: 12px; color: var(--text-muted); margin: 3px 0 10px; }
+.pool-footer { display: flex; gap: 12px; align-items: center; }
+
+.badge {
+  font-size: 11px; font-weight: 600; padding: 2px 8px;
+  border-radius: 99px; border: 1px solid var(--border); color: var(--text-muted);
+}
+
+.badge-green { color: var(--green-light); border-color: color-mix(in srgb, var(--green-light) 35%, transparent); }
+.badge-gold  { color: var(--gold-light);  border-color: color-mix(in srgb, var(--gold) 35%, transparent); }
+
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--chip); }
+.chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--chip); }
+
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* Picks */
+.progress { display: flex; gap: 4px; margin-bottom: 20px; }
+.prog-fill { flex: 1; height: 3px; border-radius: 2px; }
+
+.tier-head { display: flex; align-items: center; gap: 7px; margin: 16px 0 9px; }
+.tier-dot  { width: 7px; height: 7px; border-radius: 50%; }
+.tier-name { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--cream); }
+.tier-sub  { font-size: 11px; color: var(--text-muted); }
+
+.pick-row {
+  background: var(--card); border: 1.5px solid var(--border); border-radius: 9px;
+  padding: 10px 13px; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 11px;
+}
+
+.pick-row.s1 { border-color: var(--tier-1); background: color-mix(in srgb, var(--tier-1) 9%, var(--card)); }
+.pick-row.s2 { border-color: var(--tier-2); background: color-mix(in srgb, var(--tier-2) 9%, var(--card)); }
+
+.radio {
+  width: 17px; height: 17px; border-radius: 50%;
+  border: 2px solid var(--text-dim); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: white; font-weight: 800;
+}
+
+.radio.r1 { background: var(--tier-1); border-color: var(--tier-1); }
+.radio.r2 { background: var(--tier-2); border-color: var(--tier-2); }
+
+.player-name { font-size: 13px; font-weight: 600; color: var(--cream); }
+.player-sub  { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.odds        { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+.odds.o1     { color: var(--tier-1); }
+.odds.o2     { color: var(--tier-2); }
+
+/* Leaderboard */
+.lb-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+}
+
+.lb-row {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+}
+
+.lb-row:last-child { border-bottom: none; }
+.lb-row.first { background: color-mix(in srgb, var(--gold) 8%, var(--card)); }
+
+.lb-rank      { width: 18px; font-size: 12px; font-weight: 700; color: var(--text-dim); flex-shrink: 0; }
+.lb-rank.top  { color: var(--gold-light); }
+.lb-name      { font-size: 13px; font-weight: 600; color: var(--cream); }
+.lb-picks     { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.lb-score     { font-size: 14px; font-weight: 700; margin-left: auto; flex-shrink: 0; }
+.lb-score.neg { color: var(--green-light); }
+.lb-score.par { color: var(--text-muted); }
+
+/* Pot */
+.pot-banner {
+  background: color-mix(in srgb, var(--gold) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--gold) 22%, transparent);
+  border-radius: 9px; padding: 11px 14px; margin-bottom: 16px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+/* Tabs */
+.tabs {
+  display: flex; background: var(--surface); border-radius: 8px;
+  padding: 3px; gap: 2px; margin-bottom: 18px;
+}
+
+.tab-item {
+  flex: 1; padding: 6px; border-radius: 6px;
+  font-size: 12px; font-weight: 500; text-align: center; color: var(--text-muted);
+}
+
+.tab-item.on { background: var(--card); color: var(--cream); font-weight: 600; }
+
+/* Btn */
+.btn {
+  width: 100%; padding: 11px; border-radius: 8px;
+  font-size: 13px; font-weight: 700; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--green), var(--green-dark));
+  color: white; margin-top: 18px; display: block; text-align: center;
+  letter-spacing: 0.01em;
+}
+
+</style>
+</head>
+<body>
+
+<h1>Hosel — Masters Palette Concepts</h1>
+
+<div class="grid">
+
+  <!-- M1: Augusta Classic -->
+  <div class="concept">
+    <div class="concept-label">M1 — Augusta Classic · off-white, deep green, umber</div>
+    <div class="shell m1">
+      <div class="nav">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="white" stroke-width="1.4"/><path d="M3.5 5.5h4M5.5 3.5v4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          hosel<span class="logo-dim">.io</span>
+        </div>
+        <div class="nav-links">
+          <div class="nav-link on">Pools</div>
+          <div class="nav-link">Board</div>
+          <div class="nav-link">Picks</div>
+        </div>
+        <div class="avatar">RT</div>
+      </div>
+      <div class="body">
+        <div class="eyebrow">Your Pools</div>
+        <div class="pool-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">
+            <div class="pool-name">Sunday Funday</div>
+            <div class="badge badge-green">● Live</div>
+          </div>
+          <div class="pool-meta">PGA Championship · Quail Hollow</div>
+          <div class="pool-footer">
+            <div class="chip"><div class="chip-dot"></div>50</div>
+            <div style="font-size:11px;color:var(--text-dim)">8 entries</div>
+            <div style="font-size:11px;color:var(--green-light);font-weight:600">Picks in ✓</div>
+          </div>
+        </div>
+        <div class="pool-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">
+            <div class="pool-name">The Boys Major</div>
+            <div class="badge badge-gold">Open</div>
+          </div>
+          <div class="pool-meta">US Open · Oakmont CC</div>
+          <div class="pool-footer">
+            <div class="chip"><div class="chip-dot"></div>100</div>
+            <div style="font-size:11px;color:var(--text-dim)">3 entries</div>
+            <div style="font-size:11px;color:var(--gold-light);font-weight:600">No picks yet</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="eyebrow">Leaderboard</div>
+        <div class="lb-card">
+          <div class="lb-row first">
+            <div class="lb-rank top">1</div>
+            <div style="flex:1"><div class="lb-name">Ryan T.</div><div class="lb-picks">Scheffler · Rahm · Henley · Scott · Woods</div></div>
+            <div class="lb-score neg">−42</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank top">2</div>
+            <div style="flex:1"><div class="lb-name">Tom M.</div><div class="lb-picks">McIlroy · Åberg · Harman · Bradley</div></div>
+            <div class="lb-score neg">−38</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank">3</div>
+            <div style="flex:1"><div class="lb-name">Jake W.</div><div class="lb-picks">Hovland · Clark · Conners · Young</div></div>
+            <div class="lb-score par">−31</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- M2: Clubhouse -->
+  <div class="concept">
+    <div class="concept-label">M2 — Clubhouse · creamier white, richer leather brown</div>
+    <div class="shell m2">
+      <div class="nav">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="white" stroke-width="1.4"/><path d="M3.5 5.5h4M5.5 3.5v4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          hosel<span class="logo-dim">.io</span>
+        </div>
+        <div class="nav-links">
+          <div class="nav-link">Pools</div>
+          <div class="nav-link on">Picks</div>
+          <div class="nav-link">Board</div>
+        </div>
+        <div class="avatar">RT</div>
+      </div>
+      <div class="body">
+        <div class="page-title">Make Your Picks</div>
+        <div class="page-sub">PGA Championship · 1 per tier · 5 tiers</div>
+        <div class="progress">
+          <div class="prog-fill" style="background:var(--tier-1)"></div>
+          <div class="prog-fill" style="background:var(--tier-2)"></div>
+          <div class="prog-fill" style="background:var(--border)"></div>
+          <div class="prog-fill" style="background:var(--border)"></div>
+          <div class="prog-fill" style="background:var(--border)"></div>
+        </div>
+        <div class="tier-head">
+          <div class="tier-dot" style="background:var(--tier-1)"></div>
+          <span class="tier-name">Tier 1</span><span class="tier-sub">— Elite</span>
+        </div>
+        <div class="pick-row s1">
+          <div class="radio r1">✓</div>
+          <div style="flex:1"><div class="player-name">Scottie Scheffler</div><div class="player-sub">World #1</div></div>
+          <div class="odds o1">+450</div>
+        </div>
+        <div class="pick-row">
+          <div class="radio"></div>
+          <div style="flex:1"><div class="player-name">Rory McIlroy</div><div class="player-sub">World #2</div></div>
+          <div class="odds">+700</div>
+        </div>
+        <div class="pick-row">
+          <div class="radio"></div>
+          <div style="flex:1"><div class="player-name">Xander Schauffele</div><div class="player-sub">World #3</div></div>
+          <div class="odds">+900</div>
+        </div>
+        <div class="tier-head">
+          <div class="tier-dot" style="background:var(--tier-2)"></div>
+          <span class="tier-name">Tier 2</span><span class="tier-sub">— Contenders</span>
+        </div>
+        <div class="pick-row s2">
+          <div class="radio r2">✓</div>
+          <div style="flex:1"><div class="player-name">Jon Rahm</div><div class="player-sub">World #6</div></div>
+          <div class="odds o2">+1400</div>
+        </div>
+        <div class="pick-row">
+          <div class="radio"></div>
+          <div style="flex:1"><div class="player-name">Ludvig Åberg</div><div class="player-sub">World #7</div></div>
+          <div class="odds">+1600</div>
+        </div>
+        <div class="btn">Lock In Picks · 50 ◈</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- M3: Sunday Green (dark) -->
+  <div class="concept">
+    <div class="concept-label">M3 — Sunday Green · dark mode, pine green, amber</div>
+    <div class="shell m3">
+      <div class="nav">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="white" stroke-width="1.4"/><path d="M3.5 5.5h4M5.5 3.5v4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          hosel<span class="logo-dim">.io</span>
+        </div>
+        <div class="nav-links">
+          <div class="nav-link">Pools</div>
+          <div class="nav-link">Picks</div>
+          <div class="nav-link on">Board</div>
+        </div>
+        <div class="avatar">RT</div>
+      </div>
+      <div class="body">
+        <div class="page-title">Leaderboard</div>
+        <div class="page-sub">Sunday Funday · PGA Championship · Rd 3</div>
+        <div class="tabs">
+          <div class="tab-item on">Overall</div>
+          <div class="tab-item">R1</div>
+          <div class="tab-item">R2</div>
+          <div class="tab-item">R3</div>
+        </div>
+        <div class="pot-banner">
+          <div style="font-size:11px;color:var(--text-muted)">Total Pot</div>
+          <div style="font-size:17px;font-weight:800;color:var(--gold)">400 ◈</div>
+        </div>
+        <div class="lb-card">
+          <div class="lb-row first">
+            <div class="lb-rank top">1</div>
+            <div style="flex:1"><div class="lb-name">Ryan T.</div><div class="lb-picks">Scheffler · Rahm · Henley · Scott · Woods</div></div>
+            <div class="lb-score neg">−42</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank top">2</div>
+            <div style="flex:1"><div class="lb-name">Tom M.</div><div class="lb-picks">McIlroy · Åberg · Harman · Bradley</div></div>
+            <div class="lb-score neg">−38</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank">3</div>
+            <div style="flex:1"><div class="lb-name">Jake W.</div><div class="lb-picks">Hovland · Clark · Conners · Young</div></div>
+            <div class="lb-score par">−31</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank">4</div>
+            <div style="flex:1"><div class="lb-name">Chris P.</div><div class="lb-picks">Morikawa · Fleetwood · Fitzpatrick</div></div>
+            <div class="lb-score par">−28</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- M4: Amen Corner (dark) -->
+  <div class="concept">
+    <div class="concept-label">M4 — Amen Corner · deepest dark, most dramatic</div>
+    <div class="shell m4">
+      <div class="nav">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="white" stroke-width="1.4"/><path d="M3.5 5.5h4M5.5 3.5v4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          hosel<span class="logo-dim">.io</span>
+        </div>
+        <div class="nav-links">
+          <div class="nav-link on">Pools</div>
+          <div class="nav-link">Board</div>
+          <div class="nav-link">Picks</div>
+        </div>
+        <div class="avatar">RT</div>
+      </div>
+      <div class="body">
+        <div class="eyebrow">Your Pools</div>
+        <div class="pool-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">
+            <div class="pool-name">Sunday Funday</div>
+            <div class="badge badge-green">● Live</div>
+          </div>
+          <div class="pool-meta">PGA Championship · Quail Hollow</div>
+          <div class="pool-footer">
+            <div class="chip"><div class="chip-dot"></div>50</div>
+            <div style="font-size:11px;color:var(--text-dim)">8 entries</div>
+            <div style="font-size:11px;color:var(--green-light);font-weight:600">Picks in ✓</div>
+          </div>
+        </div>
+        <div class="pool-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">
+            <div class="pool-name">The Boys Major</div>
+            <div class="badge badge-gold">Open</div>
+          </div>
+          <div class="pool-meta">US Open · Oakmont CC</div>
+          <div class="pool-footer">
+            <div class="chip"><div class="chip-dot"></div>100</div>
+            <div style="font-size:11px;color:var(--text-dim)">3 entries</div>
+            <div style="font-size:11px;color:var(--gold-light);font-weight:600">No picks yet</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="eyebrow">Leaderboard</div>
+        <div class="lb-card">
+          <div class="lb-row first">
+            <div class="lb-rank top">1</div>
+            <div style="flex:1"><div class="lb-name">Ryan T.</div><div class="lb-picks">Scheffler · Rahm · Henley · Scott</div></div>
+            <div class="lb-score neg">−42</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank top">2</div>
+            <div style="flex:1"><div class="lb-name">Tom M.</div><div class="lb-picks">McIlroy · Åberg · Harman · Bradley</div></div>
+            <div class="lb-score neg">−38</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank">3</div>
+            <div style="flex:1"><div class="lb-name">Jake W.</div><div class="lb-picks">Hovland · Clark · Conners · Young</div></div>
+            <div class="lb-score par">−31</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- M5: Magnolia Lane -->
+  <div class="concept">
+    <div class="concept-label">M5 — Magnolia Lane · softest, most restrained light mode</div>
+    <div class="shell m5">
+      <div class="nav">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="white" stroke-width="1.4"/><path d="M3.5 5.5h4M5.5 3.5v4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          hosel<span class="logo-dim">.io</span>
+        </div>
+        <div class="nav-links">
+          <div class="nav-link">Pools</div>
+          <div class="nav-link">Picks</div>
+          <div class="nav-link on">Board</div>
+        </div>
+        <div class="avatar">RT</div>
+      </div>
+      <div class="body">
+        <div class="page-title">Leaderboard</div>
+        <div class="page-sub">Sunday Funday · PGA Championship · Rd 3</div>
+        <div class="tabs">
+          <div class="tab-item on">Overall</div>
+          <div class="tab-item">R1</div>
+          <div class="tab-item">R2</div>
+          <div class="tab-item">R3</div>
+        </div>
+        <div class="pot-banner">
+          <div style="font-size:11px;color:var(--text-muted)">Total Pot</div>
+          <div style="font-size:17px;font-weight:800;color:var(--gold)">400 ◈</div>
+        </div>
+        <div class="lb-card">
+          <div class="lb-row first">
+            <div class="lb-rank top">1</div>
+            <div style="flex:1"><div class="lb-name">Ryan T.</div><div class="lb-picks">Scheffler · Rahm · Henley · Scott · Woods</div></div>
+            <div class="lb-score neg">−42</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank top">2</div>
+            <div style="flex:1"><div class="lb-name">Tom M.</div><div class="lb-picks">McIlroy · Åberg · Harman · Bradley</div></div>
+            <div class="lb-score neg">−38</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank">3</div>
+            <div style="flex:1"><div class="lb-name">Jake W.</div><div class="lb-picks">Hovland · Clark · Conners · Young</div></div>
+            <div class="lb-score par">−31</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank">4</div>
+            <div style="flex:1"><div class="lb-name">Chris P.</div><div class="lb-picks">Morikawa · Fleetwood · Fitzpatrick</div></div>
+            <div class="lb-score par">−28</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center;margin-top:48px;font-size:11px;color:#999;letter-spacing:0.06em;font-family:Inter,sans-serif">
+  M1 Augusta Classic &nbsp;·&nbsp; M2 Clubhouse &nbsp;·&nbsp; M3 Sunday Green (dark) &nbsp;·&nbsp; M4 Amen Corner (dark) &nbsp;·&nbsp; M5 Magnolia Lane
+</div>
+
+</body>
+</html>

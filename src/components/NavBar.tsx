@@ -43,7 +43,7 @@ export function NavBar({ poolName, poolId, isAdmin }: NavBarProps) {
         position: "sticky",
         top: 0,
         zIndex: 10,
-        background: "rgba(19, 28, 23, 0.8)",
+        background: "var(--nav-bg)",
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
         borderBottom: "1px solid var(--border)",
@@ -70,9 +70,9 @@ export function NavBar({ poolName, poolId, isAdmin }: NavBarProps) {
           <span
             className="badge"
             style={{
-              background: "rgba(45,138,84,0.15)",
+              background: "rgba(40,94,58,0.15)",
               color: "var(--green-light)",
-              border: "1px solid rgba(45,138,84,0.3)",
+              border: "1px solid rgba(40,94,58,0.3)",
               fontSize: 10,
             }}
           >

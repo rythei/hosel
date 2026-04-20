@@ -5,40 +5,41 @@
 @tailwind utilities;
 
 :root {
-  /* Core backgrounds */
-  --bg:             #0a0f0d;
-  --surface:        #131c17;
-  --card:           #1a2820;
-  --card-hover:     #213429;
-  --border:         #2a3d32;
+  /* Core backgrounds — M2 Clubhouse (light) */
+  --bg:             #faf7f0;
+  --surface:        #f2ede4;
+  --card:           #ece7dc;
+  --card-hover:     #e4dfd3;
+  --border:         #d4cec4;
+  --nav-bg:         rgba(242, 237, 228, 0.85);
 
-  /* Brand greens */
-  --green:          #2d8a54;
-  --green-light:    #3aaf6a;
-  --green-dark:     #1a5c36;
+  /* Brand greens — deep Augusta forest */
+  --green:          #285e3a;
+  --green-light:    #347a4a;
+  --green-dark:     #1a4028;
 
-  /* Gold / Token */
-  --gold:           #c9a84c;
-  --gold-light:     #e0c06a;
-  --chip:           #e8b84d;
-  --chip-bg:        #e8b84d22;
+  /* Brown / Token — warm umber */
+  --gold:           #8a6030;
+  --gold-light:     #aa7840;
+  --chip:           #9a6c38;
+  --chip-bg:        #9a6c3818;
 
-  /* Text hierarchy */
-  --text:           #e8e4dc;
-  --text-muted:     #8a9490;
-  --text-dim:       #5a6660;
-  --cream:          #f5f0e8;
+  /* Text hierarchy — dark on light */
+  --text:           #28221c;
+  --text-muted:     #7c746a;
+  --text-dim:       #b4aca2;
+  --cream:          #18120c;
 
   /* Semantic */
-  --red:            #d94f4f;
+  --red:            #904040;
   --white:          #ffffff;
 
-  /* Tier colors */
-  --tier-1:         #c9a84c;
-  --tier-2:         #3aaf6a;
-  --tier-3:         #6cb4ee;
-  --tier-4:         #b490e0;
-  --tier-5:         #e08a6c;
+  /* Tier colors — muted for light bg */
+  --tier-1:         #8a6030;
+  --tier-2:         #285e3a;
+  --tier-3:         #3c5a80;
+  --tier-4:         #6c4878;
+  --tier-5:         #905048;
 
   /* Spacing */
   --space-1:  4px;
@@ -64,9 +65,9 @@
   --radius-2xl:  12px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-glow-green: 0 4px 16px rgba(45, 138, 84, 0.25);
-  --shadow-glow-gold:  0 4px 20px rgba(201, 168, 76, 0.19);
+  /* Shadows — subtle for light mode */
+  --shadow-glow-green: 0 4px 16px rgba(40, 94, 58, 0.15);
+  --shadow-glow-gold:  0 4px 20px rgba(138, 96, 48, 0.15);
 
   /* Type scale */
   --text-xs:   11px;

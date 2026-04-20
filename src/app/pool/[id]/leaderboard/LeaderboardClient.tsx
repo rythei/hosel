@@ -180,8 +180,8 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
                 gap: 4,
                 padding: "12px",
                 borderRadius: "var(--radius-lg)",
-                background: isFirst ? "rgba(201,168,76,0.03)" : idx % 2 === 0 ? "var(--surface)" : "transparent",
-                border: isFirst ? "1px solid rgba(201,168,76,0.15)" : "1px solid transparent",
+                background: isFirst ? "rgba(138,96,48,0.03)" : idx % 2 === 0 ? "var(--surface)" : "transparent",
+                border: isFirst ? "1px solid rgba(138,96,48,0.15)" : "1px solid transparent",
                 marginBottom: 4,
                 alignItems: "center",
               }}

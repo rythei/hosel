@@ -143,9 +143,9 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
             <span
               className="badge"
               style={{
-                background: "rgba(45,138,84,0.15)",
+                background: "rgba(40,94,58,0.15)",
                 color: "var(--green-light)",
-                border: "1px solid rgba(45,138,84,0.3)",
+                border: "1px solid rgba(40,94,58,0.3)",
               }}
             >
               {pool.status}
@@ -209,8 +209,8 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
             <div
               style={{
                 marginTop: 12,
-                background: "rgba(201,168,76,0.08)",
-                border: "1px solid rgba(201,168,76,0.2)",
+                background: "rgba(138,96,48,0.08)",
+                border: "1px solid rgba(138,96,48,0.2)",
                 borderRadius: "var(--radius-lg)",
                 padding: "10px 14px",
                 fontSize: "var(--text-sm)",
@@ -316,9 +316,9 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
                       <span
                         className="badge"
                         style={{
-                          background: "rgba(58,175,106,0.12)",
+                          background: "rgba(52,122,74,0.12)",
                           color: "var(--green-light)",
-                          border: "1px solid rgba(58,175,106,0.25)",
+                          border: "1px solid rgba(52,122,74,0.25)",
                         }}
                       >
                         Paid ✓
@@ -337,9 +337,9 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
                     <span
                       className="badge"
                       style={{
-                        background: "rgba(58,175,106,0.12)",
+                        background: "rgba(52,122,74,0.12)",
                         color: "var(--green-light)",
-                        border: "1px solid rgba(58,175,106,0.25)",
+                        border: "1px solid rgba(52,122,74,0.25)",
                       }}
                     >
                       Agreed ✓

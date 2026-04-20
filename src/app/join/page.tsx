@@ -147,8 +147,8 @@ function JoinForm() {
             {pool.require_buyin_confirmation && (
               <div
                 style={{
-                  background: "rgba(201,168,76,0.08)",
-                  border: "1px solid rgba(201,168,76,0.2)",
+                  background: "rgba(138,96,48,0.08)",
+                  border: "1px solid rgba(138,96,48,0.2)",
                   borderRadius: "var(--radius-lg)",
                   padding: "10px 14px",
                   marginBottom: 16,
