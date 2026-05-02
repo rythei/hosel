@@ -5,7 +5,8 @@ export type PoolStatus =
   | "live"
   | "complete"
   | "settling"
-  | "settled";
+  | "settled"
+  | "archived";
 
 export type BuyinStatus = "pending" | "confirmed";
 export type TournamentStatus = "upcoming" | "in_progress" | "complete";

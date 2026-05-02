@@ -20,6 +20,7 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
   const [authUserId, setAuthUserId] = useState<string>("");
   const [inviteCopied, setInviteCopied] = useState(false);
   const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [archiveConfirm, setArchiveConfirm] = useState(false);
 
   const loadData = useCallback(async (id: string) => {
     const supabase = createClient();
@@ -102,6 +103,12 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
   async function cancelPool() {
     const supabase = createClient();
     await supabase.from("pools").update({ status: "settled" }).eq("id", poolId);
+    router.push("/");
+  }
+
+  async function archivePool() {
+    const supabase = createClient();
+    await supabase.from("pools").update({ status: "archived" }).eq("id", poolId);
     router.push("/");
   }
 
@@ -352,6 +359,57 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
             })}
           </div>
         </div>
+
+        {/* Archive Pool */}
+        {(pool.status === "settled" || pool.status === "complete") && (
+          <div
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-2xl)",
+              padding: 20,
+              marginBottom: 16,
+            }}
+          >
+            <h2 style={{ fontSize: "var(--text-md)", fontWeight: 700, color: "var(--text-muted)", marginBottom: 4 }}>
+              Archive Pool
+            </h2>
+            <p style={{ fontSize: "var(--text-sm)", color: "var(--text-dim)", marginBottom: 12 }}>
+              Hide this pool from your active list. It won&apos;t be deleted.
+            </p>
+            {!archiveConfirm ? (
+              <button
+                className="btn-secondary"
+                style={{ fontSize: "var(--text-sm)" }}
+                onClick={() => setArchiveConfirm(true)}
+              >
+                Archive Pool
+              </button>
+            ) : (
+              <div>
+                <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginBottom: 12 }}>
+                  Are you sure? This pool will be hidden from your home screen.
+                </p>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button
+                    className="btn-secondary"
+                    style={{ flex: 1, fontSize: "var(--text-sm)" }}
+                    onClick={() => setArchiveConfirm(false)}
+                  >
+                    Never mind
+                  </button>
+                  <button
+                    className="btn-primary"
+                    style={{ flex: 1, fontSize: "var(--text-sm)" }}
+                    onClick={archivePool}
+                  >
+                    Yes, Archive
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Danger Zone */}
         {pool.status !== "live" && pool.status !== "complete" && (
