@@ -19,6 +19,7 @@ function statusLabel(status: Pool["status"]) {
     complete: { label: "Complete",          color: "var(--text-muted)" },
     settling: { label: "Settling",          color: "var(--gold)" },
     settled:  { label: "Settled",           color: "var(--text-muted)" },
+    archived: { label: "Archived",          color: "var(--text-dim)" },
   };
   return map[status] ?? { label: status, color: "var(--text-muted)" };
 }
