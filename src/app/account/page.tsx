@@ -43,11 +43,13 @@ export default async function AccountPage() {
     .eq("id", authUser.id)
     .single();
 
-  // Pools where user is organizer
+  // Pools where user is organizer (exclude archived/cancelled)
   const { data: organizedPools } = await supabase
     .from("pools")
     .select("*, tournament:tournaments(name, course, start_date)")
     .eq("organizer_id", authUser.id)
+    .neq("status", "archived")
+    .neq("status", "settled")
     .order("created_at", { ascending: false });
 
   // Pools where user is a participant (but not organizer)
@@ -59,7 +61,7 @@ export default async function AccountPage() {
   const organizedIds = new Set((organizedPools ?? []).map((p) => p.id));
   const memberPools = (entries ?? [])
     .map((e) => e.pool as unknown as Pool & { tournament: { name: string; course: string; start_date: string } })
-    .filter((p) => p && !organizedIds.has(p.id));
+    .filter((p) => p && !organizedIds.has(p.id) && p.status !== "archived" && p.status !== "settled");
 
   const allPools: PoolWithTournament[] = [
     ...(organizedPools ?? []).map((p) => ({ ...p, role: "organizer" as const })),
