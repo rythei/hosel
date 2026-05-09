@@ -175,12 +175,8 @@ export default async function HomePage() {
           background: "linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%)",
         }}
       >
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-          <HoselLogo size={48} />
-          <span style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
-            <span style={{ fontWeight: 800, fontSize: "var(--text-3xl)", color: "var(--cream)" }}>hosel</span>
-            <span style={{ fontWeight: 400, fontSize: 18, color: "var(--text-dim)" }}>.io</span>
-          </span>
+        <div style={{ marginBottom: 16 }}>
+          <HoselLogo size={72} />
         </div>
 
         <p style={{ fontSize: "var(--text-lg)", color: "var(--text-muted)", marginBottom: 6 }}>
