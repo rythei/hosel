@@ -176,7 +176,7 @@ export default async function HomePage() {
         }}
       >
         <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
-          <HoselLogo size={96} />
+          <HoselLogo size={144} />
         </div>
 
         <p style={{ fontSize: "var(--text-lg)", color: "var(--text-muted)", marginBottom: 6 }}>
