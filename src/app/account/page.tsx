@@ -63,6 +63,23 @@ export default async function AccountPage() {
     .map((e) => e.pool as unknown as Pool & { tournament: { name: string; course: string; start_date: string } })
     .filter((p) => p && !organizedIds.has(p.id) && p.status !== "archived" && p.status !== "settled");
 
+  // Archived/cancelled pools
+  const { data: archivedOrganized } = await supabase
+    .from("pools")
+    .select("*, tournament:tournaments(name, course, start_date)")
+    .eq("organizer_id", authUser.id)
+    .in("status", ["archived", "settled"])
+    .order("created_at", { ascending: false });
+
+  const archivedMemberPools = (entries ?? [])
+    .map((e) => e.pool as unknown as Pool & { tournament: { name: string; course: string; start_date: string } })
+    .filter((p) => p && !organizedIds.has(p.id) && (p.status === "archived" || p.status === "settled"));
+
+  const archivedPools: PoolWithTournament[] = [
+    ...(archivedOrganized ?? []).map((p) => ({ ...p, role: "organizer" as const })),
+    ...archivedMemberPools.map((p) => ({ ...p, role: "member" as const })),
+  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
   const allPools: PoolWithTournament[] = [
     ...(organizedPools ?? []).map((p) => ({ ...p, role: "organizer" as const })),
     ...memberPools.map((p) => ({ ...p, role: "member" as const })),
@@ -210,6 +227,64 @@ export default async function AccountPage() {
             );
           })}
         </div>
+
+        {/* Archived pools */}
+        {archivedPools.length > 0 && (
+          <details style={{ marginTop: 32 }}>
+            <summary
+              style={{
+                fontSize: "var(--text-sm)",
+                color: "var(--text-dim)",
+                fontWeight: 600,
+                cursor: "pointer",
+                listStyle: "none",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                marginBottom: 12,
+                userSelect: "none",
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ transition: "transform 0.2s", flexShrink: 0 }}>
+                <path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Archived &amp; Cancelled ({archivedPools.length})
+            </summary>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {archivedPools.map((pool) => {
+                const { label, color } = statusLabel(pool.status);
+                const href = pool.role === "organizer" ? `/pool/${pool.id}/manage` : `/pool/${pool.id}/leaderboard`;
+                return (
+                  <Link key={pool.id} href={href} style={{ textDecoration: "none" }}>
+                    <div
+                      className="card"
+                      style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, opacity: 0.6 }}
+                    >
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+                          <span style={{ fontSize: "var(--text-base)", fontWeight: 600, color: "var(--cream)" }}>
+                            {pool.name}
+                          </span>
+                          {pool.role === "organizer" && (
+                            <span className="badge" style={{ fontSize: 10, background: "rgba(0,0,0,0.06)", color: "var(--text-dim)", border: "1px solid var(--border)" }}>
+                              Organizer
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
+                          {pool.tournament.name} · <span style={{ color, fontWeight: 600 }}>{label}</span>
+                        </div>
+                      </div>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, color: "var(--text-dim)" }}>
+                        <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </details>
+        )}
       </div>
     </>
   );
