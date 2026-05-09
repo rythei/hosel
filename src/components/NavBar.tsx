@@ -53,19 +53,9 @@ export function NavBar({ poolName, poolId, isAdmin }: NavBarProps) {
         justifyContent: "space-between",
       }}
     >
-      {/* Left: Logo + wordmark */}
+      {/* Left: Logo */}
       <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-        <HoselLogo size={22} />
-        <span style={{ display: "flex", alignItems: "baseline", gap: 1 }}>
-          <span style={{ fontWeight: 800, fontSize: 16, color: "var(--cream)", letterSpacing: "0.04em", textTransform: "lowercase" }}>
-            {poolName ?? "hosel"}
-          </span>
-          {!poolName && (
-            <span style={{ fontWeight: 500, fontSize: 11, color: "var(--gold)", letterSpacing: "0.02em" }}>
-              .io
-            </span>
-          )}
-        </span>
+        <HoselLogo size={28} />
         {isAdmin && (
           <span
             className="badge"
