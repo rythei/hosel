@@ -56,12 +56,12 @@ export function NavBar({ poolName, poolId, isAdmin }: NavBarProps) {
       {/* Left: Logo + wordmark */}
       <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
         <HoselLogo size={22} />
-        <span style={{ display: "flex", alignItems: "baseline", gap: 2 }}>
-          <span style={{ fontWeight: 700, fontSize: 17, color: "var(--cream)" }}>
+        <span style={{ display: "flex", alignItems: "baseline", gap: 1 }}>
+          <span style={{ fontWeight: 800, fontSize: 16, color: "var(--cream)", letterSpacing: "0.04em", textTransform: "lowercase" }}>
             {poolName ?? "hosel"}
           </span>
           {!poolName && (
-            <span style={{ fontWeight: 400, fontSize: 12, color: "var(--text-dim)" }}>
+            <span style={{ fontWeight: 500, fontSize: 11, color: "var(--gold)", letterSpacing: "0.02em" }}>
               .io
             </span>
           )}
