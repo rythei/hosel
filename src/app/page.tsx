@@ -221,45 +221,6 @@ export default async function HomePage() {
         )}
       </div>
 
-      {/* How It Works */}
-      <div style={{ padding: "0 24px 48px" }}>
-        <h2 style={{ fontSize: "var(--text-md)", fontWeight: 700, color: "var(--text-muted)", marginBottom: 16, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-          How It Works
-        </h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 10,
-          }}
-        >
-          {[
-            { icon: "🪙", title: "Stake", desc: "Everyone puts in tokens to join the pool" },
-            { icon: "🏌️", title: "Pick", desc: "Choose 1 player from each of 5 tiers" },
-            { icon: "📊", title: "Track", desc: "Live scoring auto-updates your lineup" },
-            { icon: "🏆", title: "Win", desc: "Top 3 each day & overall winner take tokens" },
-          ].map((item) => (
-            <div
-              key={item.title}
-              style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                borderRadius: "var(--radius-xl)",
-                padding: 14,
-                textAlign: "center",
-              }}
-            >
-              <div style={{ fontSize: 24, marginBottom: 6 }}>{item.icon}</div>
-              <div style={{ fontSize: "var(--text-sm)", fontWeight: 700, color: "var(--cream)", marginBottom: 4 }}>
-                {item.title}
-              </div>
-              <div style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)" }}>
-                {item.desc}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </>
   );
 }
