@@ -88,7 +88,7 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
               </span>
             ) : (
               <span style={{ color: "var(--text-muted)", fontSize: "var(--text-sm)" }}>
-                {pool.tournament.status === "complete" ? "Final" : "Upcoming"}
+                {pool.tournament.status === "complete" ? "Final" : pool.status === "settled" || pool.status === "archived" ? "Final" : "Upcoming"}
               </span>
             ),
           },

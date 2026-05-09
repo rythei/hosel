@@ -412,7 +412,7 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
         )}
 
         {/* Danger Zone */}
-        {pool.status !== "live" && pool.status !== "complete" && (
+        {pool.status !== "live" && pool.status !== "complete" && pool.status !== "settled" && pool.status !== "archived" && (
           <div
             style={{
               background: "rgba(217,79,79,0.05)",
