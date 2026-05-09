@@ -5,41 +5,41 @@
 @tailwind utilities;
 
 :root {
-  /* Core backgrounds — Fairway dark */
-  --bg:             #022C1D;
-  --surface:        #063F2A;
-  --card:           #0a4d33;
-  --card-hover:     #0d5a3c;
-  --border:         rgba(244, 235, 221, 0.1);
-  --nav-bg:         rgba(2, 44, 29, 0.92);
+  /* Core backgrounds — M2 Clubhouse (light) */
+  --bg:             #faf7f0;
+  --surface:        #f2ede4;
+  --card:           #ece7dc;
+  --card-hover:     #e4dfd3;
+  --border:         #d4cec4;
+  --nav-bg:         rgba(242, 237, 228, 0.85);
 
-  /* Brand greens — accent/action on dark bg */
-  --green:          #1f7a48;
-  --green-light:    #2ea05f;
-  --green-dark:     #063F2A;
+  /* Brand greens — deep Augusta forest */
+  --green:          #285e3a;
+  --green-light:    #347a4a;
+  --green-dark:     #1a4028;
 
-  /* Gold / Token — muted gold accent */
-  --gold:           #B9975B;
-  --gold-light:     #d4af72;
-  --chip:           #B9975B;
-  --chip-bg:        rgba(185, 151, 91, 0.15);
+  /* Brown / Token — warm umber */
+  --gold:           #8a6030;
+  --gold-light:     #aa7840;
+  --chip:           #9a6c38;
+  --chip-bg:        #9a6c3818;
 
-  /* Text hierarchy — ivory on dark */
-  --text:           #D9C7A3;
-  --text-muted:     rgba(244, 235, 221, 0.55);
-  --text-dim:       rgba(244, 235, 221, 0.3);
-  --cream:          #F4EBDD;
+  /* Text hierarchy — dark on light */
+  --text:           #28221c;
+  --text-muted:     #7c746a;
+  --text-dim:       #b4aca2;
+  --cream:          #18120c;
 
   /* Semantic */
-  --red:            #c05858;
-  --white:          #F4EBDD;
+  --red:            #904040;
+  --white:          #ffffff;
 
-  /* Tier colors — visible on dark bg */
-  --tier-1:         #B9975B;
-  --tier-2:         #2ea05f;
-  --tier-3:         #5b9fd4;
-  --tier-4:         #a87bc5;
-  --tier-5:         #c97060;
+  /* Tier colors — muted for light bg */
+  --tier-1:         #8a6030;
+  --tier-2:         #285e3a;
+  --tier-3:         #3c5a80;
+  --tier-4:         #6c4878;
+  --tier-5:         #905048;
 
   /* Spacing */
   --space-1:  4px;
@@ -65,9 +65,9 @@
   --radius-2xl:  12px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-glow-green: 0 4px 20px rgba(6, 63, 42, 0.6);
-  --shadow-glow-gold:  0 4px 20px rgba(185, 151, 91, 0.25);
+  /* Shadows — subtle for light mode */
+  --shadow-glow-green: 0 4px 16px rgba(40, 94, 58, 0.15);
+  --shadow-glow-gold:  0 4px 20px rgba(138, 96, 48, 0.15);
 
   /* Type scale */
   --text-xs:   11px;
@@ -95,7 +95,6 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   font-size: var(--text-base);
   -webkit-font-smoothing: antialiased;
-  color-scheme: dark;
 }
 
 /* App shell */
@@ -214,6 +213,7 @@ body {
   color: var(--cream);
   font-size: var(--text-md);
   outline: none;
+  color-scheme: dark;
   width: 100%;
   transition: border-color 0.15s ease;
   font-family: inherit;
