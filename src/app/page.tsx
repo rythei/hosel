@@ -16,6 +16,7 @@ function StatusDot({ status }: { status: PoolStatus }) {
     complete: { color: "var(--text-dim)", label: "Complete", glow: false },
     settling: { color: "var(--gold)", label: "Settling", glow: false },
     settled: { color: "var(--text-dim)", label: "Settled", glow: false },
+    archived: { color: "var(--text-dim)", label: "Archived", glow: false },
   };
 
   const c = config[status];
@@ -155,9 +156,12 @@ export default async function HomePage() {
     entry_count: countMap[p.id] ?? 0,
   }));
 
+  // Filter out archived pools
+  const visiblePools = poolsWithCounts.filter((p) => p.status !== "archived");
+
   // Sort: open/live first, then locked, then complete/settled
   const statusOrder: Record<string, number> = { open: 0, live: 1, locked: 2, draft: 3, complete: 4, settling: 5, settled: 6 };
-  poolsWithCounts.sort((a, b) => (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9));
+  visiblePools.sort((a, b) => (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9));
 
   return (
     <>
@@ -198,13 +202,13 @@ export default async function HomePage() {
 
       {/* Pool list */}
       <div style={{ padding: "0 24px 32px" }}>
-        {poolsWithCounts.length > 0 ? (
+        {visiblePools.length > 0 ? (
           <>
             <h2 style={{ fontSize: "var(--text-md)", fontWeight: 700, color: "var(--text-muted)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.5px" }}>
               Your Pools
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {poolsWithCounts.map((pool) => (
+              {visiblePools.map((pool) => (
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 <PoolCard key={pool.id} pool={pool as any} />
               ))}

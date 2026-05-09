@@ -8,7 +8,7 @@ Golf tournament pick'em pool platform. Users create or join pools tied to PGA To
 - **Database + Auth + Realtime**: Supabase (project: `sxbzajoylgzsrosotwnz`, region: West US North California)
 - **Hosting**: Vercel (project: `ryan-theisens-projects/hosel`)
 - **Repo**: `github.com/rythei/hosel`
-- **Live URL**: `https://hosel.vercel.app`
+- **Live URL**: `https://hosel.io` (custom domain via Porkbun → Vercel; `hosel.vercel.app` still works as fallback)
 - **Score data**: ESPN unofficial API (`site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard?event={id}`)
 
 ## Local Development
@@ -76,7 +76,7 @@ Finds all `in_progress` tournaments, fetches ESPN scoreboard by `external_id`, a
 
 To trigger manually:
 ```bash
-curl https://hosel.vercel.app/api/scores \
+curl https://hosel.io/api/scores \
   -H "Authorization: Bearer hosel-cron-2026"
 ```
 
