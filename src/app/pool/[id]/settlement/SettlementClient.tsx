@@ -67,9 +67,33 @@ export function SettlementClient({ pool, payouts: initialPayouts, usersMap, isAd
   if (payouts.length === 0) {
     return (
       <div style={{ padding: "32px 24px", textAlign: "center" }}>
-        <p style={{ color: "var(--text-muted)", fontSize: "var(--text-base)" }}>
-          No payouts calculated yet. The tournament may still be in progress.
+        <p style={{ color: "var(--text-muted)", fontSize: "var(--text-base)", marginBottom: 20 }}>
+          No payouts calculated yet — the tournament may still be in progress.
         </p>
+        {isAdmin && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 320, margin: "0 auto" }}>
+            <a
+              href={`/pool/${poolId}/manage`}
+              style={{
+                display: "block", padding: "12px 16px", borderRadius: "var(--radius-lg)",
+                background: "var(--card)", border: "1px solid var(--border)",
+                color: "var(--cream)", fontWeight: 600, fontSize: "var(--text-sm)", textDecoration: "none",
+              }}
+            >
+              ⚙ Manage Pool
+            </a>
+            <a
+              href={`/pool/${poolId}/leaderboard`}
+              style={{
+                display: "block", padding: "12px 16px", borderRadius: "var(--radius-lg)",
+                background: "var(--card)", border: "1px solid var(--border)",
+                color: "var(--cream)", fontWeight: 600, fontSize: "var(--text-sm)", textDecoration: "none",
+              }}
+            >
+              📊 View Leaderboard
+            </a>
+          </div>
+        )}
       </div>
     );
   }

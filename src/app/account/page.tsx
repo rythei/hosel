@@ -24,11 +24,11 @@ function statusLabel(status: Pool["status"]) {
   return map[status] ?? { label: status, color: "var(--text-muted)" };
 }
 
-function poolHref(pool: Pool) {
+function poolHref(pool: Pool, role: "organizer" | "member") {
+  if (role === "organizer") return `/pool/${pool.id}/manage`;
   if (pool.status === "complete" || pool.status === "settling" || pool.status === "settled")
     return `/pool/${pool.id}/settlement`;
-  if (pool.status === "open")
-    return `/pool/${pool.id}/pick`;
+  if (pool.status === "open") return `/pool/${pool.id}/pick`;
   return `/pool/${pool.id}/leaderboard`;
 }
 
@@ -152,7 +152,7 @@ export default async function AccountPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {allPools.map((pool) => {
             const { label, color } = statusLabel(pool.status);
-            const href = poolHref(pool);
+            const href = poolHref(pool, pool.role);
             const entry = (entries ?? []).find((e) => e.pool_id === pool.id);
             const hasPicks = entry?.picks && Object.keys(entry.picks).length > 0;
 
