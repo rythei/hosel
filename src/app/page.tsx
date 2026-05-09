@@ -175,8 +175,8 @@ export default async function HomePage() {
           background: "linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%)",
         }}
       >
-        <div style={{ marginBottom: 16 }}>
-          <HoselLogo size={72} />
+        <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
+          <HoselLogo size={96} />
         </div>
 
         <p style={{ fontSize: "var(--text-lg)", color: "var(--text-muted)", marginBottom: 6 }}>
