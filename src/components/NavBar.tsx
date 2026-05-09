@@ -124,7 +124,7 @@ export function NavBar({ poolName, poolId, isAdmin }: NavBarProps) {
               cursor: "pointer",
             }}
           >
-            {user.avatar_initials || user.display_name.slice(0, 2).toUpperCase()}
+            {user.avatar_initials || (() => { const p = user.display_name.trim().split(/\s+/); return p.length >= 2 ? (p[0][0] + p[p.length - 1][0]).toUpperCase() : user.display_name.slice(0, 2).toUpperCase(); })()}
           </div>
         </Link>
       ) : (
