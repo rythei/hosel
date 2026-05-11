@@ -103,15 +103,55 @@ export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user: authUser } } = await supabase.auth.getUser();
 
-  if (!authUser) redirect("/auth/login");
+  // Fetch public pools (always, for all visitors)
+  const { data: publicPoolsRaw } = await supabase
+    .from("pools")
+    .select("*, tournament:tournaments(name, course, start_date, end_date)")
+    .eq("is_public", true)
+    .not("status", "in", '("archived","settled","draft")')
+    .order("created_at", { ascending: false });
 
-  const { data: userProfile } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", authUser.id)
-    .single<User>();
+  // Unauthenticated: show public pools only
+  if (!authUser) {
+    const publicPools = (publicPoolsRaw ?? []).map((p) => ({ ...p, entry_count: 0 }));
+    return (
+      <>
+        <NavBar />
+        <div style={{ padding: "48px 24px 40px", textAlign: "center", background: "linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%)" }}>
+          <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
+            <HoselLogo size={144} />
+          </div>
+          <p style={{ fontSize: "var(--text-lg)", color: "var(--text-muted)", marginBottom: 6 }}>
+            Pick your players. Follow the action. Claim the pot.
+          </p>
+          <p style={{ fontSize: "var(--text-sm)", color: "var(--text-dim)", marginBottom: 28 }}>
+            All pools use tokens — settle up with your crew however you like.
+          </p>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+            <Link href="/auth/login"><button className="btn-primary">Sign In</button></Link>
+            <Link href="/auth/signup"><button className="btn-secondary">Create Account</button></Link>
+          </div>
+        </div>
+        <div style={{ padding: "0 24px 32px" }}>
+          {publicPools.length > 0 && (
+            <>
+              <h2 style={{ fontSize: "var(--text-md)", fontWeight: 700, color: "var(--text-muted)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Public Pools
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {publicPools.map((pool) => (
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  <PoolCard key={pool.id} pool={pool as any} href={`/pool/${pool.id}/leaderboard`} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </>
+    );
+  }
 
-  // Fetch pools the user is in (as organizer or participant)
+  // Authenticated: fetch user's pools
   const { data: myEntries } = await supabase
     .from("pool_entries")
     .select("pool_id")
@@ -157,15 +197,8 @@ export default async function HomePage() {
     entry_count: countMap[p.id] ?? 0,
   }));
 
-  // Fetch public pools the user is not already in
+  // Filter public pools the user isn't already in
   const myPoolIds = new Set(allPools.map((p) => p.id));
-  const { data: publicPoolsRaw } = await supabase
-    .from("pools")
-    .select("*, tournament:tournaments(name, course, start_date, end_date)")
-    .eq("is_public", true)
-    .not("status", "in", '("archived","settled","draft")')
-    .order("created_at", { ascending: false });
-
   const publicPools = (publicPoolsRaw ?? [])
     .filter((p) => !myPoolIds.has(p.id))
     .map((p) => ({ ...p, entry_count: 0 }));
