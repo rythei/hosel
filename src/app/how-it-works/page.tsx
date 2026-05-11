@@ -23,7 +23,7 @@ const sections = [
     icon: "🎯",
     title: "Creating a pool",
     content: [
-      "Hit "Create a Pool" from the home screen. You'll pick a tournament, set a buy-in amount, and choose a scoring method (Best 3 of 5, Best 4 of 5, or All 5 players count).",
+      'Hit "Create a Pool" from the home screen. You\'ll pick a tournament, set a buy-in amount, and choose a scoring method (Best 3 of 5, Best 4 of 5, or All 5 players count).',
       "Once the pool is created, you'll get an invite code and a shareable link. Send it to your group — anyone with the code can join.",
       "As the organizer you can lock picks before the tournament starts, confirm buy-ins, and manage the pool from the admin dashboard.",
     ],
@@ -42,7 +42,7 @@ const sections = [
     title: "Scoring",
     content: [
       "Scores update automatically from ESPN throughout the tournament. You don't need to do anything — just check the leaderboard.",
-      "Your team score is based on the scoring method the organizer chose. "Best 3 of 5" means your top 3 performers count, drops your 2 worst. "All 5" means every player counts.",
+      'Your team score is based on the scoring method the organizer chose. "Best 3 of 5" means your top 3 performers count, drops your 2 worst. "All 5" means every player counts.',
       "Lower is better — golf scoring. The player with the lowest combined score wins the pool.",
       "There are daily prizes too: the top 3 lineups each round win a share of the round pot, and the overall winner takes the rest.",
     ],
@@ -61,7 +61,7 @@ const sections = [
     title: "Joining a pool",
     content: [
       "If someone sends you an invite link, tap it and you'll land directly in the join flow.",
-      "If you have a 6-character invite code, hit "Join with Code" on the home screen and enter it.",
+      'If you have a 6-character invite code, hit "Join with Code" on the home screen and enter it.',
       "You'll need an account to join. Sign up takes about 30 seconds.",
     ],
   },
@@ -121,12 +121,8 @@ export default function HowItWorksPage() {
             Create a pool for your group or join one with an invite code.
           </p>
           <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-            <Link href="/create">
-              <button className="btn-primary">Create a Pool</button>
-            </Link>
-            <Link href="/join">
-              <button className="btn-secondary">Join with Code</button>
-            </Link>
+            <Link href="/create" className="btn-primary">Create a Pool</Link>
+            <Link href="/join" className="btn-secondary">Join with Code</Link>
           </div>
         </div>
 
