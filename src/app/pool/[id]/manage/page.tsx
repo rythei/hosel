@@ -21,6 +21,8 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
   const [inviteCopied, setInviteCopied] = useState(false);
   const [cancelConfirm, setCancelConfirm] = useState(false);
   const [archiveConfirm, setArchiveConfirm] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
 
   const loadData = useCallback(async (id: string) => {
     const supabase = createClient();
@@ -100,6 +102,30 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
     if (data) setPool((prev) => prev ? { ...prev, status: data.status } : prev);
   }
 
+  async function unlockPool() {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("pools")
+      .update({ status: "open" })
+      .eq("id", poolId)
+      .select()
+      .single();
+    if (data) setPool((prev) => prev ? { ...prev, status: data.status } : prev);
+  }
+
+  async function saveName() {
+    if (!nameInput.trim()) return;
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("pools")
+      .update({ name: nameInput.trim() })
+      .eq("id", poolId)
+      .select()
+      .single();
+    if (data) setPool((prev) => prev ? { ...prev, name: data.name } : prev);
+    setEditingName(false);
+  }
+
   async function cancelPool() {
     const supabase = createClient();
     await supabase.from("pools").update({ status: "settled" }).eq("id", poolId);
@@ -134,9 +160,34 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
     <>
       <NavBar poolName={pool.name} poolId={poolId} isAdmin />
       <div style={{ padding: "24px 24px 48px" }}>
-        <h1 style={{ fontSize: "var(--text-2xl)", fontWeight: 800, color: "var(--cream)", marginBottom: 20 }}>
-          Manage Pool
-        </h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+          {editingName ? (
+            <>
+              <input
+                className="input"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") saveName(); if (e.key === "Escape") setEditingName(false); }}
+                style={{ fontSize: "var(--text-xl)", fontWeight: 800, flex: 1 }}
+                autoFocus
+              />
+              <button className="btn-primary" style={{ fontSize: "var(--text-sm)", padding: "8px 14px" }} onClick={saveName}>Save</button>
+              <button className="btn-secondary" style={{ fontSize: "var(--text-sm)", padding: "8px 14px" }} onClick={() => setEditingName(false)}>Cancel</button>
+            </>
+          ) : (
+            <>
+              <h1 style={{ fontSize: "var(--text-2xl)", fontWeight: 800, color: "var(--cream)", flex: 1 }}>
+                {pool.name}
+              </h1>
+              <button
+                onClick={() => { setNameInput(pool.name); setEditingName(true); }}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-dim)", fontSize: "var(--text-sm)", padding: "4px 8px" }}
+              >
+                Rename
+              </button>
+            </>
+          )}
+        </div>
 
         {/* Pool Status Card */}
         <div className="card" style={{ marginBottom: 20, position: "relative", overflow: "hidden" }}>
@@ -213,19 +264,31 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
           )}
 
           {pool.status === "locked" && (
-            <div
-              style={{
-                marginTop: 12,
-                background: "rgba(138,96,48,0.08)",
-                border: "1px solid rgba(138,96,48,0.2)",
-                borderRadius: "var(--radius-lg)",
-                padding: "10px 14px",
-                fontSize: "var(--text-sm)",
-                color: "var(--gold)",
-                textAlign: "center",
-              }}
-            >
-              Picks are locked — no further changes allowed.
+            <div style={{ marginTop: 12 }}>
+              <div
+                style={{
+                  background: "rgba(138,96,48,0.08)",
+                  border: "1px solid rgba(138,96,48,0.2)",
+                  borderRadius: "var(--radius-lg)",
+                  padding: "10px 14px",
+                  fontSize: "var(--text-sm)",
+                  color: "var(--gold)",
+                  textAlign: "center",
+                  marginBottom: 8,
+                }}
+              >
+                Picks are locked — no further changes allowed.
+              </div>
+              <button
+                className="btn-secondary"
+                style={{ width: "100%", fontSize: "var(--text-sm)" }}
+                onClick={unlockPool}
+              >
+                Unlock Picks
+              </button>
+              <p style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", textAlign: "center", marginTop: 6 }}>
+                Re-opens the pool so players can edit their picks.
+              </p>
             </div>
           )}
         </div>
