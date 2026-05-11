@@ -12,7 +12,8 @@ interface Props {
 }
 
 const STATUS_OPTIONS = ["upcoming", "in_progress", "complete"] as const;
-const TIER_LABELS = ["Elite", "Contenders", "Dark Horses", "Sleepers", "Longshots"];
+const TIER_LABELS = ["Elite", "Contenders", "Dark Horses", "Sleepers", "Longshots", "Field"];
+const MAX_TIERS = 6;
 
 const blankTournament: {
   external_id: string;
@@ -245,7 +246,8 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
     }));
   }
 
-  const tierGroups = [1, 2, 3, 4, 5].map((tier) => ({
+  const numTiersInUse = Math.max(...players.map((p) => p.tier ?? 1), 5);
+  const tierGroups = Array.from({ length: numTiersInUse }, (_, i) => i + 1).map((tier) => ({
     tier,
     label: TIER_LABELS[tier - 1],
     players: players.filter((p) => p.tier === tier),
@@ -514,7 +516,7 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
                   <div>
                     <label style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 4 }}>TIER *</label>
                     <select className="input" value={playerForm.tier} onChange={(e) => setPlayerForm((f) => ({ ...f, tier: e.target.value }))}>
-                      {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>T{n} — {TIER_LABELS[n - 1]}</option>)}
+                      {Array.from({ length: MAX_TIERS }, (_, i) => i + 1).map((n) => <option key={n} value={n}>T{n} — {TIER_LABELS[n - 1]}</option>)}
                     </select>
                   </div>
                   <div>
@@ -569,7 +571,7 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
                         onChange={(e) => setCsvPreview((prev) => prev ? prev.map((r, j) => j === i ? { ...r, tier: parseInt(e.target.value) } : r) : prev)}
                         style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)", color: `var(--tier-${row.tier})`, fontSize: "var(--text-xs)", padding: "3px 6px", cursor: "pointer", fontWeight: 700 }}
                       >
-                        {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>T{n} — {TIER_LABELS[n - 1]}</option>)}
+                        {Array.from({ length: MAX_TIERS }, (_, i) => i + 1).map((n) => <option key={n} value={n}>T{n} — {TIER_LABELS[n - 1]}</option>)}
                       </select>
                     </div>
                   ))}
