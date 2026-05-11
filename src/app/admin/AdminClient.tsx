@@ -188,6 +188,19 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
     }));
   }
 
+  async function togglePoolPublic(poolId: string, current: boolean) {
+    const supabase = createClient();
+    const { data } = await supabase.from("pools").update({ is_public: !current }).eq("id", poolId).select().single();
+    if (!data) return;
+    setPoolsByTournament((prev) => {
+      const next = { ...prev };
+      for (const tid of Object.keys(next)) {
+        next[tid] = next[tid].map((p) => p.id === poolId ? { ...p, is_public: data.is_public } : p);
+      }
+      return next;
+    });
+  }
+
   async function deletePool(poolId: string) {
     const supabase = createClient();
     const { error } = await supabase.from("pools").delete().eq("id", poolId);
@@ -443,6 +456,12 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
                         <span style={{ fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--cream)" }}>{pool.name}</span>
                         <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", marginLeft: 8 }}>{pool.status}</span>
                       </div>
+                      <button
+                        onClick={() => togglePoolPublic(pool.id, pool.is_public)}
+                        style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 99, cursor: "pointer", border: `1px solid ${pool.is_public ? "rgba(40,94,58,0.4)" : "var(--border)"}`, background: pool.is_public ? "rgba(40,94,58,0.12)" : "var(--surface)", color: pool.is_public ? "var(--green-light)" : "var(--text-muted)" }}
+                      >
+                        {pool.is_public ? "Public ✓" : "Private"}
+                      </button>
                       {confirmDeletePoolId === pool.id ? (
                         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                           <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Sure?</span>
