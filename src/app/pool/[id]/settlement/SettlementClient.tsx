@@ -45,10 +45,19 @@ export function SettlementClient({ pool, payouts: initialPayouts, usersMap, isAd
 
   async function markDistributed(payoutId: string) {
     const supabase = createClient();
+    const payout = payouts.find((p) => p.id === payoutId);
+    if (!payout) return;
+
     await supabase
       .from("pool_payouts")
       .update({ is_distributed: true, distributed_at: new Date().toISOString() })
       .eq("id", payoutId);
+
+    // Credit winner's token balance
+    const { data: winner } = await supabase.from("users").select("token_balance").eq("id", payout.user_id).single();
+    if (winner) {
+      await supabase.from("users").update({ token_balance: winner.token_balance + payout.token_amount }).eq("id", payout.user_id);
+    }
 
     setPayouts((prev) =>
       prev.map((p) =>

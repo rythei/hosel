@@ -13,6 +13,7 @@ function JoinForm() {
   const searchParams = useSearchParams();
   const [code, setCode] = useState(searchParams.get("code") ?? "");
   const [pool, setPool] = useState<(Pool & { tournament: { name: string; course: string; start_date: string } }) | null>(null);
+  const [userBalance, setUserBalance] = useState<number | null>(null);
   const [lookupError, setLookupError] = useState("");
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState("");
@@ -34,6 +35,12 @@ function JoinForm() {
       setLookupError("This pool is no longer accepting entries.");
     } else {
       setPool(data as Pool & { tournament: { name: string; course: string; start_date: string } });
+      // Fetch user balance for this context
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase.from("users").select("token_balance").eq("id", user.id).single();
+        if (profile) setUserBalance(profile.token_balance);
+      }
     }
   }
 
@@ -46,6 +53,14 @@ function JoinForm() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push("/auth/login"); return; }
+
+      // Check balance
+      const { data: profile } = await supabase.from("users").select("token_balance").eq("id", user.id).single();
+      if (profile && profile.token_balance < pool.buy_in) {
+        setJoinError(`Insufficient tokens. You have ${profile.token_balance} but need ${pool.buy_in}.`);
+        setJoining(false);
+        return;
+      }
 
       const buyinStatus = pool.require_buyin_confirmation ? "pending" : "confirmed";
 
@@ -64,6 +79,8 @@ function JoinForm() {
         setJoinError(`${error.message} (${error.code})`);
         setJoining(false);
       } else {
+        // Deduct buy-in from balance
+        await supabase.from("users").update({ token_balance: (profile?.token_balance ?? 0) - pool.buy_in }).eq("id", user.id);
         router.push(`/pool/${pool.id}/pick`);
       }
     } catch (err) {
@@ -142,6 +159,12 @@ function JoinForm() {
               <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
                 By joining, you agree to a <TokenAmount amount={pool.buy_in} size={12} /> buy-in for this pool. Settle up with your organizer directly.
               </p>
+              {userBalance !== null && (
+                <p style={{ fontSize: "var(--text-xs)", color: userBalance >= pool.buy_in ? "var(--text-dim)" : "var(--red)", marginTop: 6 }}>
+                  Your balance: <strong>{userBalance.toLocaleString()}</strong> tokens
+                  {userBalance < pool.buy_in && " — insufficient to join"}
+                </p>
+              )}
             </div>
 
             {pool.require_buyin_confirmation && (
@@ -168,7 +191,7 @@ function JoinForm() {
               className="btn-primary"
               style={{ width: "100%" }}
               onClick={joinPool}
-              disabled={joining}
+              disabled={joining || (userBalance !== null && userBalance < pool.buy_in)}
             >
               {joining ? "Joining…" : `Join Pool & Make Picks`}
             </button>

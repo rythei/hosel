@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { NavBar } from "@/components/NavBar";
-import { TokenAmount } from "@/components/HoselLogo";
+import { TokenAmount, ChipIcon } from "@/components/HoselLogo";
 import Link from "next/link";
 import type { Pool } from "@/types";
 
@@ -39,7 +39,7 @@ export default async function AccountPage() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("display_name, avatar_initials, email, created_at")
+    .select("display_name, avatar_initials, email, created_at, token_balance")
     .eq("id", authUser.id)
     .single();
 
@@ -84,6 +84,17 @@ export default async function AccountPage() {
     ...(organizedPools ?? []).map((p) => ({ ...p, role: "organizer" as const })),
     ...memberPools.map((p) => ({ ...p, role: "member" as const })),
   ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  // Fetch payouts for history P&L
+  const settledPoolIds = archivedPools.map((p) => p.id);
+  const { data: myPayouts } = settledPoolIds.length > 0
+    ? await supabase.from("pool_payouts").select("pool_id, token_amount").eq("user_id", authUser.id).in("pool_id", settledPoolIds)
+    : { data: [] };
+
+  const payoutsByPool = (myPayouts ?? []).reduce<Record<string, number>>((acc, p) => {
+    acc[p.pool_id] = (acc[p.pool_id] ?? 0) + p.token_amount;
+    return acc;
+  }, {});
 
   const signOutUrl = `/auth/signout`;
 
@@ -132,6 +143,36 @@ export default async function AccountPage() {
           >
             Sign out
           </a>
+        </div>
+
+        {/* Token balance */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(138,96,48,0.08), rgba(138,96,48,0.04))",
+            border: "1px solid rgba(138,96,48,0.2)",
+            borderRadius: "var(--radius-xl)",
+            padding: "16px 20px",
+            marginBottom: 28,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>
+              Token Balance
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <ChipIcon size={20} color="var(--chip)" />
+              <span style={{ fontSize: "var(--text-2xl)", fontWeight: 800, color: "var(--chip)", fontFamily: "monospace" }}>
+                {(profile?.token_balance ?? 0).toLocaleString()}
+              </span>
+            </div>
+          </div>
+          <div style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", textAlign: "right" }}>
+            <div>Deducted on join</div>
+            <div>Credited on win</div>
+          </div>
         </div>
 
         {/* Pools */}
@@ -248,17 +289,22 @@ export default async function AccountPage() {
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ transition: "transform 0.2s", flexShrink: 0 }}>
                 <path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              Archived &amp; Cancelled ({archivedPools.length})
+              History ({archivedPools.length})
             </summary>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {archivedPools.map((pool) => {
                 const { label, color } = statusLabel(pool.status);
                 const href = pool.role === "organizer" ? `/pool/${pool.id}/manage` : `/pool/${pool.id}/leaderboard`;
+                const entry = (entries ?? []).find((e) => e.pool_id === pool.id);
+                const costBasis = entry?.buyin_status === "confirmed" ? pool.buy_in : 0;
+                const winnings = payoutsByPool[pool.id] ?? 0;
+                const net = winnings - costBasis;
+                const showNet = entry && pool.status === "settled";
                 return (
                   <Link key={pool.id} href={href} style={{ textDecoration: "none" }}>
                     <div
                       className="card"
-                      style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, opacity: 0.6 }}
+                      style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, opacity: 0.75 }}
                     >
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
@@ -275,6 +321,14 @@ export default async function AccountPage() {
                           {pool.tournament.name} · <span style={{ color, fontWeight: 600 }}>{label}</span>
                         </div>
                       </div>
+                      {showNet && (
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          <div style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginBottom: 2 }}>net</div>
+                          <span style={{ fontFamily: "monospace", fontWeight: 700, fontSize: "var(--text-sm)", color: net > 0 ? "var(--green-light)" : net < 0 ? "var(--red)" : "var(--text-muted)" }}>
+                            {net > 0 ? "+" : ""}{net.toLocaleString()}
+                          </span>
+                        </div>
+                      )}
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, color: "var(--text-dim)" }}>
                         <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>

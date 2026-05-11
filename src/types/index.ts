@@ -20,6 +20,7 @@ export interface User {
   email: string;
   display_name: string;
   avatar_initials: string;
+  token_balance: number;
   created_at: string;
 }
 
