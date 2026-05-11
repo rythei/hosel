@@ -47,9 +47,25 @@ export default async function PickPlayersPage({ params }: { params: Promise<{ id
 
   if (!entry) redirect(`/join?code=${pool.invite_code}`);
 
-  // Lock picks only when organizer has explicitly locked/closed the pool
+  // Show locked state instead of redirecting
   if (pool.status === "locked" || pool.status === "complete" || pool.status === "settling" || pool.status === "settled") {
-    redirect(`/pool/${id}/leaderboard`);
+    return (
+      <>
+        <NavBar poolName={pool.name} poolId={id} />
+        <div style={{ padding: "64px 24px", textAlign: "center" }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>🔒</div>
+          <h1 style={{ fontSize: "var(--text-xl)", fontWeight: 800, color: "var(--cream)", marginBottom: 8 }}>
+            Picks are locked
+          </h1>
+          <p style={{ fontSize: "var(--text-base)", color: "var(--text-muted)", marginBottom: 28 }}>
+            The organizer has locked this pool — no further changes are allowed.
+          </p>
+          <a href={`/pool/${id}/leaderboard`} style={{ textDecoration: "none" }}>
+            <button className="btn-primary">View Leaderboard</button>
+          </a>
+        </div>
+      </>
+    );
   }
 
   const { data: players } = await supabase
