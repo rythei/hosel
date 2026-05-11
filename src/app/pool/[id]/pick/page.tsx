@@ -57,6 +57,7 @@ export default async function PickPlayersPage({ params }: { params: Promise<{ id
     .select("*")
     .eq("tournament_id", pool.tournament_id)
     .eq("status", "active")
+    .lte("tier", pool.num_tiers)
     .order("tier", { ascending: true })
     .order("world_ranking", { ascending: true });
 
