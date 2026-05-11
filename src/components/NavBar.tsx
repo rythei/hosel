@@ -35,7 +35,10 @@ export function NavBar({ poolName, poolId, isAdmin }: NavBarProps) {
         { href: `/pool/${poolId}/leaderboard`, label: "Board" },
         { href: `/pool/${poolId}/pick`, label: "Picks" },
       ]
-    : [{ href: "/", label: "Pools" }];
+    : [
+        { href: "/", label: "Pools" },
+        { href: "/how-it-works", label: "Guide" },
+      ];
 
   return (
     <nav
