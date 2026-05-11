@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { Tournament, TournamentPlayer } from "@/types";
+import type { Tournament, TournamentPlayer, Pool } from "@/types";
 
 interface Props {
   tournaments: Tournament[];
   playersByTournament: Record<string, TournamentPlayer[]>;
+  poolsByTournament: Record<string, Pool[]>;
 }
 
 const STATUS_OPTIONS = ["upcoming", "in_progress", "complete"] as const;
@@ -87,7 +88,7 @@ function parseCsv(text: string): CsvRow[] {
   });
 }
 
-export function AdminClient({ tournaments: initial, playersByTournament: initialPlayers }: Props) {
+export function AdminClient({ tournaments: initial, playersByTournament: initialPlayers, poolsByTournament: initialPools }: Props) {
   const router = useRouter();
   const [tournaments, setTournaments] = useState<Tournament[]>(initial);
   const [playersByTournament, setPlayersByTournament] = useState(initialPlayers);
@@ -96,11 +97,13 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
   const [showPlayerForm, setShowPlayerForm] = useState(false);
   const [tournamentForm, setTournamentForm] = useState(blankTournament);
   const [playerForm, setPlayerForm] = useState(blankPlayer);
+  const [poolsByTournament, setPoolsByTournament] = useState(initialPools);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [csvPreview, setCsvPreview] = useState<CsvRow[] | null>(null);
   const [importing, setImporting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmDeletePoolId, setConfirmDeletePoolId] = useState<string | null>(null);
 
   const selected = tournaments.find((t) => t.id === selectedId) ?? null;
   const players = selectedId ? (playersByTournament[selectedId] ?? []) : [];
@@ -182,6 +185,20 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
       ...prev,
       [selectedId]: (prev[selectedId] ?? []).filter((p) => p.id !== playerId),
     }));
+  }
+
+  async function deletePool(poolId: string) {
+    const supabase = createClient();
+    const { error } = await supabase.from("pools").delete().eq("id", poolId);
+    if (error) { setError(error.message); return; }
+    setPoolsByTournament((prev) => {
+      const next = { ...prev };
+      for (const tid of Object.keys(next)) {
+        next[tid] = next[tid].filter((p) => p.id !== poolId);
+      }
+      return next;
+    });
+    setConfirmDeletePoolId(null);
   }
 
   function handleCsvFile(file: File) {
@@ -410,6 +427,49 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
                 </div>
               </div>
             </div>
+
+            {/* Pools */}
+            {(poolsByTournament[selected.id] ?? []).length > 0 && (
+              <div className="card" style={{ padding: "14px 18px", marginBottom: 16 }}>
+                <div style={{ fontSize: "var(--text-xs)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 10 }}>
+                  Pools ({(poolsByTournament[selected.id] ?? []).length})
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {(poolsByTournament[selected.id] ?? []).map((pool) => (
+                    <div key={pool.id} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "8px 12px" }}>
+                      <div style={{ flex: 1 }}>
+                        <span style={{ fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--cream)" }}>{pool.name}</span>
+                        <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", marginLeft: 8 }}>{pool.status}</span>
+                      </div>
+                      {confirmDeletePoolId === pool.id ? (
+                        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Sure?</span>
+                          <button
+                            onClick={() => deletePool(pool.id)}
+                            style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 99, cursor: "pointer", border: "none", background: "var(--red)", color: "white" }}
+                          >
+                            Yes, delete
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeletePoolId(null)}
+                            style={{ fontSize: 11, padding: "3px 8px", borderRadius: 99, cursor: "pointer", border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text-muted)" }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDeletePoolId(pool.id)}
+                          style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 99, cursor: "pointer", border: "1px solid rgba(144,64,64,0.3)", background: "rgba(144,64,64,0.06)", color: "var(--red)" }}
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Players by tier */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
