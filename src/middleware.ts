@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  const publicPaths = ["/auth/login", "/auth/signup", "/auth/callback"];
+  const publicPaths = ["/auth/login", "/auth/signup", "/auth/callback", "/auth/signout", "/auth/reset-password", "/auth/update-password"];
   const isPublicPath = publicPaths.some((p) => pathname.startsWith(p));
 
   if (!user && !isPublicPath) {
@@ -40,7 +40,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && pathname.startsWith("/auth/")) {
+  const authOnlyPaths = ["/auth/login", "/auth/signup"];
+  if (user && authOnlyPaths.some((p) => pathname.startsWith(p))) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
