@@ -33,8 +33,10 @@ export async function middleware(request: NextRequest) {
 
   const publicPaths = ["/auth/login", "/auth/signup", "/auth/callback", "/auth/signout", "/auth/reset-password", "/auth/update-password"];
   const isPublicPath = publicPaths.some((p) => pathname.startsWith(p));
+  // Leaderboard pages handle their own auth/public checks
+  const isLeaderboard = /^\/pool\/[^/]+\/leaderboard/.test(pathname);
 
-  if (!user && !isPublicPath) {
+  if (!user && !isPublicPath && !isLeaderboard) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);

@@ -65,6 +65,7 @@ export interface Pool {
   entry_deadline: string;
   invite_code: string;
   require_buyin_confirmation: boolean;
+  is_public: boolean;
   status: PoolStatus;
   total_pot: number;
   created_at: string;

@@ -60,6 +60,18 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
     });
   }, [params, loadData]);
 
+  async function togglePublic() {
+    if (!pool) return;
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("pools")
+      .update({ is_public: !pool.is_public })
+      .eq("id", poolId)
+      .select()
+      .single();
+    if (data) setPool((prev) => prev ? { ...prev, is_public: data.is_public } : prev);
+  }
+
   async function toggleBuyinConfirmation() {
     if (!pool) return;
     const supabase = createClient();
@@ -299,6 +311,17 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
             <h2 style={{ fontSize: "var(--text-xl)", fontWeight: 700, color: "var(--cream)" }}>
               Entries ({entries.length})
             </h2>
+            {/* Toggles */}
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>Public</span>
+                <button
+                  onClick={togglePublic}
+                  style={{ width: 36, height: 20, borderRadius: 10, background: pool.is_public ? "var(--green)" : "var(--border)", border: "none", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}
+                >
+                  <span style={{ position: "absolute", top: 2, left: pool.is_public ? 18 : 2, width: 16, height: 16, borderRadius: "50%", background: "white", transition: "left 0.2s" }} />
+                </button>
+              </div>
             {/* Buy-in confirmation toggle */}
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>Require buy-in</span>
@@ -330,6 +353,7 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
                 />
               </button>
             </div>
+          </div>
           </div>
 
           {entries.length === 0 && (

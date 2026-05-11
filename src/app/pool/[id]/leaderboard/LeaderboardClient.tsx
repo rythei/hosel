@@ -15,6 +15,9 @@ interface Props {
   totalPot: number;
   isAdmin: boolean;
   poolId: string;
+  isPublic: boolean;
+  hasEntry: boolean;
+  isAuthenticated: boolean;
 }
 
 function formatScore(score: number | null): string {
@@ -23,7 +26,7 @@ function formatScore(score: number | null): string {
   return score > 0 ? `+${score}` : `${score}`;
 }
 
-export function LeaderboardClient({ pool, leaderboard: initial, entryCount, totalPot, isAdmin, poolId }: Props) {
+export function LeaderboardClient({ pool, leaderboard: initial, entryCount, totalPot, isAdmin, poolId, isPublic, hasEntry, isAuthenticated }: Props) {
   const [activeTab, setActiveTab] = useState<RoundTab>("Total");
   const [rows, setRows] = useState<LeaderboardRow[]>(initial);
   const rounds: RoundTab[] = ["R1", "R2", "R3", "R4", "Total"];
@@ -99,6 +102,29 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
           </div>
         ))}
       </div>
+
+      {/* Public join / sign-in banner */}
+      {isPublic && !hasEntry && pool.status === "open" && (
+        <div style={{ margin: "16px 24px 0", background: "rgba(40,94,58,0.08)", border: "1px solid rgba(40,94,58,0.25)", borderRadius: "var(--radius-xl)", padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <div>
+            <div style={{ fontSize: "var(--text-sm)", fontWeight: 700, color: "var(--green-light)", marginBottom: 2 }}>This pool is open to join</div>
+            <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>Buy-in: {pool.buy_in} tokens</div>
+          </div>
+          {isAuthenticated ? (
+            <a href={`/pool/${poolId}/pick`} style={{ textDecoration: "none" }}>
+              <button className="btn-primary" style={{ fontSize: "var(--text-sm)", padding: "8px 16px", whiteSpace: "nowrap" }}>
+                Join &amp; Pick
+              </button>
+            </a>
+          ) : (
+            <a href={`/auth/login?next=/pool/${poolId}/leaderboard`} style={{ textDecoration: "none" }}>
+              <button className="btn-primary" style={{ fontSize: "var(--text-sm)", padding: "8px 16px", whiteSpace: "nowrap" }}>
+                Sign in to Join
+              </button>
+            </a>
+          )}
+        </div>
+      )}
 
       {/* Payout Banner */}
       <div

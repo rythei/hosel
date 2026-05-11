@@ -10,7 +10,6 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
   const supabase = await createClient();
 
   const { data: { user: authUser } } = await supabase.auth.getUser();
-  if (!authUser) redirect("/auth/login");
 
   const { data: pool } = await supabase
     .from("pools")
@@ -19,6 +18,7 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
     .single<Pool & { tournament: { name: string; course: string; status: string; current_round: number | null } }>();
 
   if (!pool) redirect("/");
+  if (!pool.is_public && !authUser) redirect("/auth/login");
 
   const { data: entries } = await supabase
     .from("pool_entries")
@@ -45,7 +45,8 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
     usersMap
   );
 
-  const isAdmin = pool.organizer_id === authUser.id;
+  const isAdmin = authUser ? pool.organizer_id === authUser.id : false;
+  const hasEntry = authUser ? (entries ?? []).some((e) => e.user_id === authUser.id) : false;
 
   // Pot only counts confirmed buy-ins
   const confirmedEntries = (entries ?? []).filter((e) => e.buyin_status === "confirmed");
@@ -62,6 +63,9 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
         totalPot={totalPot}
         isAdmin={isAdmin}
         poolId={id}
+        isPublic={pool.is_public ?? false}
+        hasEntry={hasEntry}
+        isAuthenticated={!!authUser}
       />
     </>
   );
