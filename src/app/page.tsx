@@ -39,12 +39,13 @@ function StatusDot({ status }: { status: PoolStatus }) {
   );
 }
 
-function PoolCard({ pool }: { pool: Pool & { entry_count: number; tournament: { name: string; course: string; start_date: string; end_date: string } } }) {
+function PoolCard({ pool, href: hrefOverride }: { pool: Pool & { entry_count: number; tournament: { name: string; course: string; start_date: string; end_date: string } }; href?: string }) {
   const isActive = pool.status === "open" || pool.status === "live";
-  const href =
+  const href = hrefOverride ?? (
     pool.status === "open" ? `/pool/${pool.id}/pick` :
     pool.status === "complete" || pool.status === "settling" || pool.status === "settled" ? `/pool/${pool.id}/settlement` :
-    `/pool/${pool.id}/leaderboard`;
+    `/pool/${pool.id}/leaderboard`
+  );
 
   return (
     <Link href={href} style={{ textDecoration: "none" }}>
@@ -156,6 +157,19 @@ export default async function HomePage() {
     entry_count: countMap[p.id] ?? 0,
   }));
 
+  // Fetch public pools the user is not already in
+  const myPoolIds = new Set(allPools.map((p) => p.id));
+  const { data: publicPoolsRaw } = await supabase
+    .from("pools")
+    .select("*, tournament:tournaments(name, course, start_date, end_date)")
+    .eq("is_public", true)
+    .not("status", "in", '("archived","settled","draft")')
+    .order("created_at", { ascending: false });
+
+  const publicPools = (publicPoolsRaw ?? [])
+    .filter((p) => !myPoolIds.has(p.id))
+    .map((p) => ({ ...p, entry_count: 0 }));
+
   // Filter out archived pools
   const visiblePools = poolsWithCounts.filter((p) => p.status !== "archived");
 
@@ -217,6 +231,20 @@ export default async function HomePage() {
           >
             <p style={{ fontSize: "var(--text-lg)", marginBottom: 8 }}>No pools yet</p>
             <p style={{ fontSize: "var(--text-base)" }}>Create a pool or join one with a code.</p>
+          </div>
+        )}
+
+        {publicPools.length > 0 && (
+          <div style={{ marginTop: 32 }}>
+            <h2 style={{ fontSize: "var(--text-md)", fontWeight: 700, color: "var(--text-muted)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              Public Pools
+            </h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {publicPools.map((pool) => (
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                <PoolCard key={pool.id} pool={pool as any} href={`/pool/${pool.id}/leaderboard`} />
+              ))}
+            </div>
           </div>
         )}
       </div>
