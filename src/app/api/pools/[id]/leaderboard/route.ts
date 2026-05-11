@@ -18,8 +18,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const { data: entries } = await supabase
     .from("pool_entries")
     .select("*")
-    .eq("pool_id", id)
-    .eq("buyin_status", "confirmed");
+    .eq("pool_id", id);
 
   const { data: players } = await supabase
     .from("tournament_players")

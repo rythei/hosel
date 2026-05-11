@@ -23,8 +23,7 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
   const { data: entries } = await supabase
     .from("pool_entries")
     .select("*")
-    .eq("pool_id", id)
-    .eq("buyin_status", "confirmed");
+    .eq("pool_id", id);
 
   const { data: players } = await supabase
     .from("tournament_players")
@@ -48,9 +47,10 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
 
   const isAdmin = pool.organizer_id === authUser.id;
 
-  // Compute entry counts
+  // Pot only counts confirmed buy-ins
+  const confirmedEntries = (entries ?? []).filter((e) => e.buyin_status === "confirmed");
   const entryCount = (entries ?? []).length;
-  const totalPot = pool.buy_in * entryCount;
+  const totalPot = pool.buy_in * confirmedEntries.length;
 
   return (
     <>
