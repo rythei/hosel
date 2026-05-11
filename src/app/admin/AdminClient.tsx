@@ -41,6 +41,7 @@ interface CsvRow {
   odds: string;
   world_ranking: string;
   tier: number;
+  tierExplicit: boolean;
 }
 
 function parseOddsToNumber(odds: string): number {
@@ -50,31 +51,39 @@ function parseOddsToNumber(odds: string): number {
   return n < 0 ? n : n;
 }
 
-function assignTiers(rows: Omit<CsvRow, "tier">[], numTiers = 5): CsvRow[] {
+function assignTiers(rows: CsvRow[], numTiers = 5): CsvRow[] {
+  // If all rows have explicit tiers, skip auto-assignment entirely
+  if (rows.every((r) => r.tierExplicit)) return rows;
+
   const sorted = [...rows].sort((a, b) => {
     const av = parseOddsToNumber(a.odds);
     const bv = parseOddsToNumber(b.odds);
-    // Negatives (favorites) first, then ascending positives
     if (av < 0 && bv >= 0) return -1;
     if (av >= 0 && bv < 0) return 1;
     return av - bv;
   });
   const chunkSize = Math.ceil(sorted.length / numTiers);
-  return sorted.map((row, i) => ({ ...row, tier: Math.min(Math.floor(i / chunkSize) + 1, numTiers) }));
+  return sorted.map((row, i) => ({
+    ...row,
+    tier: row.tierExplicit ? row.tier : Math.min(Math.floor(i / chunkSize) + 1, numTiers),
+  }));
 }
 
-function parseCsv(text: string): Omit<CsvRow, "tier">[] {
+function parseCsv(text: string): CsvRow[] {
   const lines = text.trim().split(/\r?\n/);
   const header = lines[0].toLowerCase().split(",").map((h) => h.trim());
   const nameIdx = header.findIndex((h) => h.includes("name") || h.includes("player"));
   const oddsIdx = header.findIndex((h) => h.includes("odds"));
   const rankIdx = header.findIndex((h) => h.includes("rank") || h.includes("ranking"));
+  const tierIdx = header.findIndex((h) => h === "tier");
   if (nameIdx === -1) return [];
   return lines.slice(1).flatMap((line) => {
     const cols = line.split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
     const name = cols[nameIdx] ?? "";
     if (!name) return [];
-    return [{ name, odds: oddsIdx >= 0 ? (cols[oddsIdx] ?? "") : "", world_ranking: rankIdx >= 0 ? (cols[rankIdx] ?? "") : "" }];
+    const explicitTier = tierIdx >= 0 ? parseInt(cols[tierIdx] ?? "") : NaN;
+    const tierExplicit = !isNaN(explicitTier) && explicitTier >= 1;
+    return [{ name, odds: oddsIdx >= 0 ? (cols[oddsIdx] ?? "") : "", world_ranking: rankIdx >= 0 ? (cols[rankIdx] ?? "") : "", tier: tierExplicit ? explicitTier : 1, tierExplicit }];
   });
 }
 
