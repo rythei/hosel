@@ -40,6 +40,7 @@ export async function middleware(request: NextRequest) {
   if (!user && !isPublicPath && !isLeaderboard && !isHome) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
+    url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
   }
 

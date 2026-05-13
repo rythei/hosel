@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { HoselLogo } from "@/components/HoselLogo";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -25,7 +27,7 @@ export default function LoginPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push("/");
+      router.push(next);
       router.refresh();
     }
   }
@@ -112,7 +114,7 @@ export default function LoginPage() {
 
         <p style={{ textAlign: "center", marginTop: 20, fontSize: "var(--text-base)", color: "var(--text-muted)" }}>
           Don&apos;t have an account?{" "}
-          <Link href="/auth/signup" style={{ color: "var(--green-light)", textDecoration: "none", fontWeight: 600 }}>
+          <Link href={`/auth/signup${next !== "/" ? `?next=${encodeURIComponent(next)}` : ""}`} style={{ color: "var(--green-light)", textDecoration: "none", fontWeight: 600 }}>
             Sign up
           </Link>
         </p>
