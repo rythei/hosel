@@ -246,7 +246,7 @@ export function PickPlayersClient({ pool, entry, tierGroups, tierLabels, tierCol
                 type="number"
                 value={tiebreaker[round] ?? ""}
                 onChange={(e) => setTiebreaker((prev) => ({ ...prev, [round]: e.target.value ? Number(e.target.value) : null }))}
-                placeholder="-7"
+                placeholder="70"
                 inputMode="numeric"
                 className="input"
                 style={{ textAlign: "center", fontFamily: "monospace" }}
