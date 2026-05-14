@@ -175,7 +175,7 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "32px 1fr 48px 48px 48px 60px",
+            gridTemplateColumns: "32px 1fr 48px 48px 48px 48px 60px",
             gap: 4,
             padding: "0 12px 8px",
             fontSize: "var(--text-xs)",
@@ -190,6 +190,7 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
           <span style={{ textAlign: "center" }}>R1</span>
           <span style={{ textAlign: "center" }}>R2</span>
           <span style={{ textAlign: "center" }}>R3</span>
+          <span style={{ textAlign: "center" }}>R4</span>
           <span style={{ textAlign: "right" }}>Total</span>
         </div>
 
@@ -202,7 +203,7 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
               key={row.entry_id}
               style={{
                 display: "grid",
-                gridTemplateColumns: "32px 1fr 48px 48px 48px 60px",
+                gridTemplateColumns: "32px 1fr 48px 48px 48px 48px 60px",
                 gap: 4,
                 padding: "12px",
                 borderRadius: "var(--radius-lg)",
@@ -243,7 +244,7 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
               </div>
 
               {/* Round scores */}
-              {([row.r1_score, row.r2_score, row.r3_score] as (number | null)[]).map((score, i) => (
+              {([row.r1_score, row.r2_score, row.r3_score, row.r4_score] as (number | null)[]).map((score, i) => (
                 <span
                   key={i}
                   style={{
