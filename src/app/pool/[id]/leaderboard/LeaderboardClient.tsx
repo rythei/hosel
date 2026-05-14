@@ -29,6 +29,7 @@ function formatScore(score: number | null): string {
 export function LeaderboardClient({ pool, leaderboard: initial, entryCount, totalPot, isAdmin, poolId, isPublic, hasEntry, isAuthenticated }: Props) {
   const [activeTab, setActiveTab] = useState<RoundTab>("Total");
   const [rows, setRows] = useState<LeaderboardRow[]>(initial);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const rounds: RoundTab[] = ["R1", "R2", "R3", "R4", "Total"];
 
   // Supabase Realtime — re-fetch when tournament_players update
@@ -198,80 +199,82 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
         {rows.map((row, idx) => {
           const isFirst = row.rank === 1;
           const isTop3 = row.rank <= 3;
+          const isExpanded = expandedRow === row.entry_id;
           return (
-            <div
-              key={row.entry_id}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "32px 1fr 48px 48px 48px 48px 60px",
-                gap: 4,
-                padding: "12px",
-                borderRadius: "var(--radius-lg)",
-                background: isFirst ? "rgba(138,96,48,0.03)" : idx % 2 === 0 ? "var(--surface)" : "transparent",
-                border: isFirst ? "1px solid rgba(138,96,48,0.15)" : "1px solid transparent",
-                marginBottom: 4,
-                alignItems: "center",
-              }}
-            >
-              {/* Rank */}
-              <span
+            <div key={row.entry_id} style={{ marginBottom: 4 }}>
+              {/* Main row */}
+              <div
+                onClick={() => setExpandedRow(isExpanded ? null : row.entry_id)}
                 style={{
-                  fontWeight: 800,
-                  fontSize: "var(--text-base)",
-                  color: isFirst ? "var(--gold)" : isTop3 ? "var(--green-light)" : "var(--text-muted)",
+                  display: "grid",
+                  gridTemplateColumns: "32px 1fr 48px 48px 48px 48px 60px",
+                  gap: 4,
+                  padding: "12px",
+                  borderRadius: isExpanded ? "var(--radius-lg) var(--radius-lg) 0 0" : "var(--radius-lg)",
+                  background: isFirst ? "rgba(138,96,48,0.03)" : idx % 2 === 0 ? "var(--surface)" : "transparent",
+                  border: isFirst ? "1px solid rgba(138,96,48,0.15)" : "1px solid transparent",
+                  alignItems: "center",
+                  cursor: "pointer",
                 }}
               >
-                {row.rank}
-              </span>
-
-              {/* Player */}
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: "var(--text-md)", fontWeight: 600, color: "var(--cream)", display: "flex", alignItems: "center", gap: 4 }}>
-                  {isFirst && <span style={{ fontSize: 11 }}>🏆</span>}
-                  {row.display_name}
+                <span style={{ fontWeight: 800, fontSize: "var(--text-base)", color: isFirst ? "var(--gold)" : isTop3 ? "var(--green-light)" : "var(--text-muted)" }}>
+                  {row.rank}
+                </span>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: "var(--text-md)", fontWeight: 600, color: "var(--cream)", display: "flex", alignItems: "center", gap: 4 }}>
+                    {isFirst && <span style={{ fontSize: 11 }}>🏆</span>}
+                    {row.display_name}
+                    <span style={{ fontSize: 10, color: "var(--text-dim)", marginLeft: 2 }}>{isExpanded ? "▲" : "▼"}</span>
+                  </div>
+                  <div style={{ fontSize: 10, color: "var(--text-dim)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {row.picks.map((p) => p.player_name).join(" · ")}
+                  </div>
                 </div>
-                <div
-                  style={{
-                    fontSize: 10,
-                    color: "var(--text-dim)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {row.picks.map((p) => p.player_name).join(" · ")}
-                </div>
+                {([row.r1_score, row.r2_score, row.r3_score, row.r4_score] as (number | null)[]).map((score, i) => (
+                  <span key={i} style={{ textAlign: "center", fontFamily: "monospace", fontSize: "var(--text-base)", fontWeight: 500, color: score === null ? "var(--text-dim)" : "var(--text)", opacity: activeTab === `R${i + 1}` ? 1 : activeTab === "Total" ? 1 : 0.4 }}>
+                    {formatScore(score)}
+                  </span>
+                ))}
+                <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 15, fontWeight: 800, color: isFirst ? "var(--gold)" : isTop3 ? "var(--green-light)" : "var(--text)" }}>
+                  {formatScore(row.total_score)}
+                </span>
               </div>
 
-              {/* Round scores */}
-              {([row.r1_score, row.r2_score, row.r3_score, row.r4_score] as (number | null)[]).map((score, i) => (
-                <span
-                  key={i}
-                  style={{
-                    textAlign: "center",
-                    fontFamily: "monospace",
-                    fontSize: "var(--text-base)",
-                    fontWeight: 500,
-                    color: score === null ? "var(--text-dim)" : "var(--text)",
-                    opacity: activeTab === `R${i + 1}` ? 1 : activeTab === "Total" ? 1 : 0.4,
-                  }}
-                >
-                  {formatScore(score)}
-                </span>
-              ))}
-
-              {/* Total */}
-              <span
-                style={{
-                  textAlign: "right",
-                  fontFamily: "monospace",
-                  fontSize: 15,
-                  fontWeight: 800,
-                  color: isFirst ? "var(--gold)" : isTop3 ? "var(--green-light)" : "var(--text)",
-                }}
-              >
-                {formatScore(row.total_score)}
-              </span>
+              {/* Expanded player breakdown */}
+              {isExpanded && (
+                <div style={{ background: "var(--surface)", border: isFirst ? "1px solid rgba(138,96,48,0.15)" : "1px solid var(--border)", borderTop: "none", borderRadius: "0 0 var(--radius-lg) var(--radius-lg)", padding: "8px 12px 12px" }}>
+                  {/* Sub-header */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 48px 48px 48px 48px", gap: 4, padding: "4px 0 6px", borderBottom: "1px solid var(--border)", marginBottom: 6 }}>
+                    <span style={{ fontSize: 10, color: "var(--text-dim)", fontWeight: 600, textTransform: "uppercase" }}>Player</span>
+                    {["R1","R2","R3","R4"].map((r) => (
+                      <span key={r} style={{ fontSize: 10, color: "var(--text-dim)", fontWeight: 600, textAlign: "center", textTransform: "uppercase" }}>{r}</span>
+                    ))}
+                  </div>
+                  {row.picks.map((pick) => {
+                    const isCut = pick.status === "cut";
+                    const isOut = pick.status === "withdrawn" || pick.status === "disqualified";
+                    return (
+                      <div key={pick.player_name} style={{ display: "grid", gridTemplateColumns: "1fr 48px 48px 48px 48px", gap: 4, padding: "5px 0", borderBottom: "1px solid rgba(255,255,255,0.04)", alignItems: "center" }}>
+                        <div>
+                          <span style={{ fontSize: "var(--text-xs)", color: isCut || isOut ? "var(--text-dim)" : "var(--cream)", fontWeight: 500 }}>
+                            {pick.player_name}
+                          </span>
+                          {(isCut || isOut) && (
+                            <span style={{ fontSize: 9, color: "var(--red)", fontWeight: 700, marginLeft: 5, textTransform: "uppercase" }}>
+                              {isCut ? "CUT" : "WD"}
+                            </span>
+                          )}
+                        </div>
+                        {([pick.r1, pick.r2, pick.r3, pick.r4] as (number | null)[]).map((score, i) => (
+                          <span key={i} style={{ textAlign: "center", fontFamily: "monospace", fontSize: "var(--text-xs)", color: score === null ? "var(--text-dim)" : score < 0 ? "var(--green-light)" : score > 0 ? "var(--red)" : "var(--cream)", opacity: activeTab === `R${i + 1}` ? 1 : activeTab === "Total" ? 1 : 0.35 }}>
+                            {formatScore(score)}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}

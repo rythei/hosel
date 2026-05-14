@@ -130,7 +130,7 @@ export interface LeaderboardRow {
   entry_id: string;
   user_id: string;
   display_name: string;
-  picks: Array<{ tier: number; player_name: string }>;
+  picks: Array<{ tier: number; player_name: string; r1: number | null; r2: number | null; r3: number | null; r4: number | null; status: string }>;
   r1_score: number | null;
   r2_score: number | null;
   r3_score: number | null;

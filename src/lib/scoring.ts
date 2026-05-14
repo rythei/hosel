@@ -60,10 +60,18 @@ export function computeLeaderboard(
 
     const pickLabels = Object.entries(entry.picks ?? {})
       .sort(([a], [b]) => Number(a) - Number(b))
-      .map(([tier, pid]) => ({
-        tier: Number(tier),
-        player_name: playerMap[pid as string]?.name ?? "?",
-      }));
+      .map(([tier, pid]) => {
+        const p = playerMap[pid as string];
+        return {
+          tier: Number(tier),
+          player_name: p?.name ?? "?",
+          r1: p ? getRoundScore(p, 1) : null,
+          r2: p ? getRoundScore(p, 2) : null,
+          r3: p ? getRoundScore(p, 3) : null,
+          r4: p ? getRoundScore(p, 4) : null,
+          status: p?.status ?? "active",
+        };
+      });
 
     return {
       rank: 0,
