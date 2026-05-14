@@ -6,7 +6,9 @@ import { fetchESPNScores } from "@/lib/espn";
 export async function GET(request: Request) {
   // Verify cron secret in production
   const authHeader = request.headers.get("authorization");
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronHeader = request.headers.get("x-cron-secret");
+  const secret = process.env.CRON_SECRET;
+  if (secret && authHeader !== `Bearer ${secret}` && cronHeader !== secret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
