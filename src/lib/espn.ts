@@ -71,14 +71,17 @@ function parseCompetitor(c: ESPNCompetitor, allCompetitors: ESPNCompetitor[]): E
     }
   }
 
-  // Fill in-progress round from live total
-  if (totalPar !== null && linescores.length > 0) {
-    const lastRoundIdx = (linescores[linescores.length - 1].period ?? linescores.length) - 1;
-    const lastHoles = (linescores[linescores.length - 1].linescores ?? []).length;
-
-    if (lastHoles > 0 && lastHoles < 18) {
-      const completedSum = roundPars.reduce<number>((acc, v) => acc + (v ?? 0), 0);
-      roundPars[lastRoundIdx] = totalPar - completedSum;
+  // Fill in-progress round from live total — find the last round with holes played but not finished
+  if (totalPar !== null) {
+    for (let r = linescores.length - 1; r >= 0; r--) {
+      const ls = linescores[r];
+      const holeScores = (ls.linescores ?? []).length;
+      const roundIdx = (ls.period ?? r + 1) - 1;
+      if (holeScores > 0 && holeScores < 18) {
+        const completedSum = roundPars.reduce<number>((acc, v) => acc + (v ?? 0), 0);
+        roundPars[roundIdx] = totalPar - completedSum;
+        break;
+      }
     }
   }
 
