@@ -117,17 +117,17 @@ export default async function HomePage() {
     return (
       <>
         <NavBar />
-        <div style={{ padding: "48px 24px 40px", textAlign: "center", background: "linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%)" }}>
-          <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
-            <HoselLogo size={220} />
+        <div style={{ padding: "24px 24px 20px", textAlign: "center", background: "linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%)" }}>
+          <div style={{ marginBottom: 10, display: "flex", justifyContent: "center" }}>
+            <HoselLogo size={200} />
           </div>
-          <p style={{ fontSize: "var(--text-lg)", fontWeight: 700, color: "var(--cream)", marginBottom: 8 }}>
-            Golf gambling, handled.
+          <p style={{ fontSize: "var(--text-lg)", fontWeight: 700, color: "var(--cream)", marginBottom: 6 }}>
+            Golf games, quick and easy.
           </p>
-          <p style={{ fontSize: "var(--text-base)", color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 8px" }}>
-            From PGA major pick&apos;em pools to Wolf with your Saturday crew — Hosel is building the home for how golfers bet.
+          <p style={{ fontSize: "var(--text-base)", color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 6px" }}>
+            From pick&apos;em pools for Majors to a round of WOLF with your Sunday crew. Hosel is building the home for how golfers bet.
           </p>
-          <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginBottom: 24, letterSpacing: "0.3px" }}>
+          <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginBottom: 16, letterSpacing: "0.3px" }}>
             Pick&apos;em pools live now &nbsp;·&nbsp; Personal rounds &amp; local tournaments coming soon
           </p>
           <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
@@ -220,22 +220,22 @@ export default async function HomePage() {
       {/* Hero */}
       <div
         style={{
-          padding: "48px 24px 40px",
+          padding: "24px 24px 20px",
           textAlign: "center",
           background: "linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%)",
         }}
       >
-        <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
-          <HoselLogo size={220} />
+        <div style={{ marginBottom: 10, display: "flex", justifyContent: "center" }}>
+          <HoselLogo size={200} />
         </div>
 
-        <p style={{ fontSize: "var(--text-lg)", fontWeight: 700, color: "var(--cream)", marginBottom: 8 }}>
-          Golf gambling, handled.
+        <p style={{ fontSize: "var(--text-lg)", fontWeight: 700, color: "var(--cream)", marginBottom: 6 }}>
+          Golf games, quick and easy.
         </p>
-        <p style={{ fontSize: "var(--text-base)", color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 8px" }}>
-          From PGA major pick&apos;em pools to Wolf with your Saturday crew — Hosel is building the home for how golfers bet.
+        <p style={{ fontSize: "var(--text-base)", color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 6px" }}>
+          From pick&apos;em pools for Majors to a round of WOLF with your Sunday crew. Hosel is building the home for how golfers bet.
         </p>
-        <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginBottom: 28, letterSpacing: "0.3px" }}>
+        <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginBottom: 16, letterSpacing: "0.3px" }}>
           Pick&apos;em pools live now &nbsp;·&nbsp; Personal rounds &amp; local tournaments coming soon
         </p>
 
