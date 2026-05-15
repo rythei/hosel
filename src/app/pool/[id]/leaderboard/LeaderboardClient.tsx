@@ -182,6 +182,7 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
     alignItems: "center",
     justifyContent: "center",
     gap: 2,
+    whiteSpace: "nowrap" as const,
   });
 
   return (
