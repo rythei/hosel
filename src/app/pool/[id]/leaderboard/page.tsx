@@ -55,7 +55,7 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
 
   return (
     <>
-      <NavBar poolName={pool.name} poolId={id} isAdmin={isAdmin} />
+      <NavBar poolName={pool.name} poolId={id} poolStatus={pool.status} isAdmin={isAdmin} />
       <LeaderboardClient
         pool={pool as Pool & { tournament: { name: string; course: string; status: string; current_round: number | null } }}
         leaderboard={leaderboard}

@@ -42,9 +42,20 @@ const sections = [
     title: "Scoring",
     content: [
       "Scores update automatically from ESPN throughout the tournament. You don't need to do anything — just check the leaderboard.",
-      'Your team score is based on the scoring method the organizer chose. "Best 3 of 5" means your top 3 performers count, drops your 2 worst. "All 5" means every player counts.',
-      "Lower is better — golf scoring. The player with the lowest combined score wins the pool.",
-      "There are daily prizes too: the top 3 lineups each round win a share of the round pot, and the overall winner takes the rest.",
+      'Your team score is based on the scoring method the organizer chose. "Best 3 of 5" means your top 3 performers count each round, dropping your 2 worst. "All 5" means every player counts.',
+      "Lower is better — golf scoring. The entry with the lowest combined score wins the pool.",
+      "There are daily prizes too: the top 3 lineups each round win a share of the round pot, and the overall winner takes the rest. Round payouts are only awarded once that round is officially complete.",
+      "To make the weekend rounds (R3/R4) and compete for the overall pot, you need a minimum number of your picked players to make the cut — set by the organizer when the pool is created.",
+    ],
+  },
+  {
+    icon: "⚖️",
+    title: "Tiebreakers",
+    content: [
+      "When two or more entries finish a round with the same score, tiebreakers decide who ranks higher.",
+      "First tiebreaker: before each round, you predict the lowest individual round score of the day (in strokes). Once the round finishes, whoever predicted closest to the actual daily low wins the tiebreak.",
+      "Second tiebreaker (if still tied): did you pick one of the golfers who actually shot that lowest round? If one entry picked a player who shot the daily low and the other didn't, the entry that picked the low scorer wins.",
+      "If everything is still equal after both tiebreakers, entries share the same rank. A TB badge on the leaderboard marks the entry that won a tiebreaker within a tied score group.",
     ],
   },
   {

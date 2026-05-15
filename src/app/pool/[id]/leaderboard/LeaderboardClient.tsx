@@ -56,7 +56,7 @@ function computeWinnings(
 
   (["r1_score", "r2_score", "r3_score", "r4_score"] as const).forEach((key, i) => {
     if (!isComplete(i + 1)) return; // skip rounds still in progress
-    const eligible = rows.filter((r) => r[key] !== null);
+    const eligible = rows.filter((r) => r[key] !== null && (i < 2 || r.is_eligible_weekend));
     if (eligible.length === 0) return;
     const sorted = [...eligible].sort((a, b) => (a[key] as number) - (b[key] as number));
     ([splits.first, splits.second, splits.third] as number[]).forEach((pct, idx) => {
@@ -393,9 +393,10 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
       {/* Scoring rules note */}
       <div style={{ margin: "20px 24px 0", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "12px 16px", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
         <span style={{ fontWeight: 600, color: "var(--cream)" }}>Scoring: </span>
-        {pool.scoring_method.replace(/_/g, " ")} player scores each day.
-        Need {pool.cut_rule_minimum}+ players to make the cut for R3/R4 &amp; overall eligibility.
-        Tiebreaker = closest predicted daily low score wins ties.
+        {pool.scoring_method.replace(/_/g, " ")} player scores each round.
+        {" "}Need {pool.cut_rule_minimum}+ players to make the cut for R3/R4 &amp; overall eligibility.
+        {" "}<span style={{ fontWeight: 600, color: "var(--cream)" }}>Tiebreaker: </span>
+        Closest predicted daily low score wins; second tiebreaker is picking the player who shot it.
       </div>
 
       {isAdmin && (

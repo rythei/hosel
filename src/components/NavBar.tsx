@@ -9,10 +9,11 @@ import { HoselLogo, ChipIcon } from "./HoselLogo";
 interface NavBarProps {
   poolName?: string;
   poolId?: string;
+  poolStatus?: string;
   isAdmin?: boolean;
 }
 
-export function NavBar({ poolName, poolId, isAdmin }: NavBarProps) {
+export function NavBar({ poolName, poolId, poolStatus, isAdmin }: NavBarProps) {
   const pathname = usePathname();
   const [user, setUser] = useState<{ display_name: string; avatar_initials: string; token_balance: number } | null>(null);
 
@@ -29,11 +30,12 @@ export function NavBar({ poolName, poolId, isAdmin }: NavBarProps) {
     });
   }, []);
 
+  const picksOpen = poolStatus === "open";
   const navLinks = poolId
     ? [
         { href: "/", label: "Pools" },
         { href: `/pool/${poolId}/leaderboard`, label: "Board" },
-        { href: `/pool/${poolId}/pick`, label: "Picks" },
+        ...(picksOpen ? [{ href: `/pool/${poolId}/pick`, label: "Picks" }] : []),
       ]
     : [
         { href: "/", label: "Pools" },
@@ -58,7 +60,7 @@ export function NavBar({ poolName, poolId, isAdmin }: NavBarProps) {
     >
       {/* Left: Logo */}
       <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-        <HoselLogo size={36} />
+        <HoselLogo size={52} />
         {isAdmin && (
           <span
             className="badge"
