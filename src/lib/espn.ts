@@ -1,5 +1,3 @@
-export const PAR = 70;
-
 export interface ESPNPlayerScore {
   name: string;
   roundPars: (number | null)[];
@@ -9,7 +7,7 @@ export interface ESPNPlayerScore {
   cut: "Y" | "N" | "WD" | "DQ" | "";
 }
 
-export async function fetchESPNScores(eventId: string): Promise<ESPNPlayerScore[]> {
+export async function fetchESPNScores(eventId: string, par = 72): Promise<ESPNPlayerScore[]> {
   const url = `https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard?event=${eventId}`;
   const res = await fetch(url, { next: { revalidate: 0 } });
 
@@ -24,7 +22,7 @@ export async function fetchESPNScores(eventId: string): Promise<ESPNPlayerScore[
     return [];
   }
 
-  return competitors.map((c) => parseCompetitor(c, competitors));
+  return competitors.map((c) => parseCompetitor(c, competitors, par));
 }
 
 interface ESPNLinescore {
@@ -41,7 +39,7 @@ interface ESPNCompetitor {
   status?: { type?: { name?: string }; displayValue?: string } | string;
 }
 
-function parseCompetitor(c: ESPNCompetitor, allCompetitors: ESPNCompetitor[]): ESPNPlayerScore {
+function parseCompetitor(c: ESPNCompetitor, allCompetitors: ESPNCompetitor[], par: number): ESPNPlayerScore {
   const name = c.athlete?.displayName ?? "";
 
   // Overall to-par
@@ -69,7 +67,7 @@ function parseCompetitor(c: ESPNCompetitor, allCompetitors: ESPNCompetitor[]): E
     if (isLastRound) thruHoles = holeScores;
 
     if (holeScores === 18 && rawStrokes !== null) {
-      roundPars[roundIdx] = rawStrokes - PAR;
+      roundPars[roundIdx] = rawStrokes - par;
       roundsComplete[roundIdx] = true; // confirmed 18 holes, not a live estimate
     }
   }

@@ -22,6 +22,7 @@ const blankTournament: {
   start_date: string;
   end_date: string;
   status: Tournament["status"];
+  par: string;
 } = {
   external_id: "",
   name: "",
@@ -29,6 +30,7 @@ const blankTournament: {
   start_date: "",
   end_date: "",
   status: "upcoming",
+  par: "72",
 };
 
 const blankPlayer = {
@@ -122,6 +124,7 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
         start_date: tournamentForm.start_date,
         end_date: tournamentForm.end_date,
         status: tournamentForm.status,
+        par: parseInt(tournamentForm.par) || 72,
         current_round: null,
         cut_line: null,
       })
@@ -313,6 +316,10 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
             <div>
               <label style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 4 }}>ESPN EVENT ID</label>
               <input className="input" placeholder="401353230 (for score sync)" value={tournamentForm.external_id} onChange={(e) => setTournamentForm((f) => ({ ...f, external_id: e.target.value }))} />
+            </div>
+            <div>
+              <label style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 4 }}>COURSE PAR</label>
+              <input className="input" type="number" min="68" max="74" placeholder="72" value={tournamentForm.par} onChange={(e) => setTournamentForm((f) => ({ ...f, par: e.target.value }))} />
             </div>
             <div>
               <label style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 4 }}>STATUS</label>

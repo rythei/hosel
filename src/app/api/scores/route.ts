@@ -51,7 +51,7 @@ export async function GET(request: Request) {
   // Find all in-progress tournaments with an ESPN event ID
   const { data: tournaments } = await supabase
     .from("tournaments")
-    .select("id, external_id, name")
+    .select("id, external_id, name, par")
     .eq("status", "in_progress")
     .not("external_id", "is", null);
 
@@ -63,7 +63,7 @@ export async function GET(request: Request) {
 
   for (const tournament of tournaments) {
     try {
-      const scores = await fetchESPNScores(tournament.external_id!);
+      const scores = await fetchESPNScores(tournament.external_id!, tournament.par ?? 72);
 
       for (const score of scores) {
         const statusMap: Record<string, string> = {
