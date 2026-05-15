@@ -119,7 +119,7 @@ export default async function HomePage() {
         <NavBar />
         <div style={{ padding: "48px 24px 40px", textAlign: "center", background: "linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%)" }}>
           <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
-            <HoselLogo size={144} />
+            <HoselLogo size={220} />
           </div>
           <p style={{ fontSize: "var(--text-lg)", color: "var(--text-muted)", marginBottom: 6 }}>
             Pick your players. Follow the action. Claim the pot.
@@ -223,7 +223,7 @@ export default async function HomePage() {
         }}
       >
         <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
-          <HoselLogo size={144} />
+          <HoselLogo size={220} />
         </div>
 
         <p style={{ fontSize: "var(--text-lg)", color: "var(--text-muted)", marginBottom: 6 }}>
