@@ -43,7 +43,7 @@ function PoolCard({ pool, href: hrefOverride }: { pool: Pool & { entry_count: nu
   const isActive = pool.status === "open" || pool.status === "live";
   const href = hrefOverride ?? (
     pool.status === "open" ? `/pool/${pool.id}/pick` :
-    pool.status === "complete" || pool.status === "settling" || pool.status === "settled" ? `/pool/${pool.id}/settlement` :
+    pool.status === "complete" || pool.status === "settling" ? `/pool/${pool.id}/settlement` :
     `/pool/${pool.id}/leaderboard`
   );
 
@@ -117,15 +117,18 @@ export default async function HomePage() {
     return (
       <>
         <NavBar />
-        <div style={{ padding: "48px 24px 40px", textAlign: "center", background: "linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%)" }}>
-          <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
-            <HoselLogo size={144} />
+        <div style={{ padding: "24px 24px 20px", textAlign: "center", background: "linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%)" }}>
+          <div style={{ marginBottom: 10, display: "flex", justifyContent: "center" }}>
+            <HoselLogo size={200} />
           </div>
-          <p style={{ fontSize: "var(--text-lg)", color: "var(--text-muted)", marginBottom: 6 }}>
-            Pick your players. Follow the action. Claim the pot.
+          <p style={{ fontSize: "var(--text-lg)", fontWeight: 700, color: "var(--cream)", marginBottom: 6 }}>
+            Golf games, quick and easy.
           </p>
-          <p style={{ fontSize: "var(--text-sm)", color: "var(--text-dim)", marginBottom: 28 }}>
-            All pools use tokens — settle up with your crew however you like.
+          <p style={{ fontSize: "var(--text-base)", color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 6px" }}>
+            From pick&apos;em pools for Majors to a round of WOLF with your Sunday crew. Hosel is building the home for how golfers bet.
+          </p>
+          <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginBottom: 16, letterSpacing: "0.3px" }}>
+            Pick&apos;em pools live now &nbsp;·&nbsp; Personal rounds &amp; local tournaments coming soon
           </p>
           <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
             <Link href="/auth/login"><button className="btn-primary">Sign In</button></Link>
@@ -217,20 +220,23 @@ export default async function HomePage() {
       {/* Hero */}
       <div
         style={{
-          padding: "48px 24px 40px",
+          padding: "24px 24px 20px",
           textAlign: "center",
           background: "linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%)",
         }}
       >
-        <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
-          <HoselLogo size={144} />
+        <div style={{ marginBottom: 10, display: "flex", justifyContent: "center" }}>
+          <HoselLogo size={200} />
         </div>
 
-        <p style={{ fontSize: "var(--text-lg)", color: "var(--text-muted)", marginBottom: 6 }}>
-          Pick your players. Follow the action. Claim the pot.
+        <p style={{ fontSize: "var(--text-lg)", fontWeight: 700, color: "var(--cream)", marginBottom: 6 }}>
+          Golf games, quick and easy.
         </p>
-        <p style={{ fontSize: "var(--text-sm)", color: "var(--text-dim)", marginBottom: 28 }}>
-          All pools use tokens — settle up with your crew however you like.
+        <p style={{ fontSize: "var(--text-base)", color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 6px" }}>
+          From pick&apos;em pools for Majors to a round of WOLF with your Sunday crew. Hosel is building the home for how golfers bet.
+        </p>
+        <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginBottom: 16, letterSpacing: "0.3px" }}>
+          Pick&apos;em pools live now &nbsp;·&nbsp; Personal rounds &amp; local tournaments coming soon
         </p>
 
         <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
