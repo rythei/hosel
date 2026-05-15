@@ -43,7 +43,7 @@ function PoolCard({ pool, href: hrefOverride }: { pool: Pool & { entry_count: nu
   const isActive = pool.status === "open" || pool.status === "live";
   const href = hrefOverride ?? (
     pool.status === "open" ? `/pool/${pool.id}/pick` :
-    pool.status === "complete" || pool.status === "settling" || pool.status === "settled" ? `/pool/${pool.id}/settlement` :
+    pool.status === "complete" || pool.status === "settling" ? `/pool/${pool.id}/settlement` :
     `/pool/${pool.id}/leaderboard`
   );
 
