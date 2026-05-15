@@ -48,13 +48,25 @@ export function computeLeaderboard(
       }
     }
 
-    // Total = sum of per-round best-X scores.
-    // Each round independently takes the best X players' scores for that day,
-    // then those round totals are added together. Different players can count
-    // in different rounds.
-    const computed = roundScores.filter((s): s is number => s !== null);
-    if (computed.length > 0) {
-      totalScore = computed.reduce((a, b) => a + b, 0);
+    const totalScoringMethod = pool.total_scoring_method ?? "sum_of_rounds";
+
+    if (totalScoringMethod === "best_players_overall") {
+      // Pick the best-X players by cumulative tournament score, sum their totals.
+      const playerCount = pool.scoring_method === "best_4_of_5" ? 4 : pool.scoring_method === "all_5" ? 5 : 3;
+      const eligiblePlayers = pickedPlayers
+        .filter((p) => p.status !== "cut" && p.status !== "withdrawn" && p.status !== "disqualified")
+        .filter((p) => p.total_score !== null);
+      const sorted = [...eligiblePlayers].sort((a, b) => (a.total_score ?? 0) - (b.total_score ?? 0));
+      const counting = sorted.slice(0, playerCount);
+      if (counting.length > 0) {
+        totalScore = counting.reduce((sum, p) => sum + (p.total_score ?? 0), 0);
+      }
+    } else {
+      // sum_of_rounds: sum the per-round best-X totals (Tom's method, default)
+      const computed = roundScores.filter((s): s is number => s !== null);
+      if (computed.length > 0) {
+        totalScore = computed.reduce((a, b) => a + b, 0);
+      }
     }
 
     // Weekend eligibility: X+ players making the cut

@@ -12,6 +12,7 @@ export type BuyinStatus = "pending" | "confirmed";
 export type TournamentStatus = "upcoming" | "in_progress" | "complete";
 export type PlayerStatus = "active" | "cut" | "withdrawn" | "disqualified";
 export type ScoringMethod = "best_3_of_5" | "best_4_of_5" | "all_5";
+export type TotalScoringMethod = "sum_of_rounds" | "best_players_overall";
 export type PayoutCategory = "round_1" | "round_2" | "round_3" | "round_4" | "overall";
 export type PayoutPlacement = "first" | "second" | "third" | "winner";
 
@@ -60,6 +61,7 @@ export interface Pool {
   buy_in: number;
   max_entries: number;
   scoring_method: ScoringMethod;
+  total_scoring_method: TotalScoringMethod;
   num_tiers: number;
   cut_rule_minimum: number;
   payout_structure: PayoutStructure;

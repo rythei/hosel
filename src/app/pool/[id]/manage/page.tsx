@@ -60,6 +60,19 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
     });
   }, [params, loadData]);
 
+  async function toggleTotalScoringMethod() {
+    if (!pool) return;
+    const supabase = createClient();
+    const next = pool.total_scoring_method === "best_players_overall" ? "sum_of_rounds" : "best_players_overall";
+    const { data } = await supabase
+      .from("pools")
+      .update({ total_scoring_method: next })
+      .eq("id", poolId)
+      .select()
+      .single();
+    if (data) setPool((prev) => prev ? { ...prev, total_scoring_method: data.total_scoring_method } : prev);
+  }
+
   async function toggleBuyinConfirmation() {
     if (!pool) return;
     const supabase = createClient();
@@ -301,6 +314,39 @@ export default function ManagePoolPage({ params }: { params: Promise<{ id: strin
             </h2>
             {/* Toggles */}
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            {/* Total scoring method toggle */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
+                {pool.total_scoring_method === "best_players_overall" ? "Best players overall" : "Sum of rounds"}
+              </span>
+              <button
+                onClick={toggleTotalScoringMethod}
+                style={{
+                  width: 36,
+                  height: 20,
+                  borderRadius: 10,
+                  background: pool.total_scoring_method === "best_players_overall" ? "var(--green)" : "var(--border)",
+                  border: "none",
+                  cursor: "pointer",
+                  position: "relative",
+                  transition: "background 0.2s",
+                  flexShrink: 0,
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    top: 2,
+                    left: pool.total_scoring_method === "best_players_overall" ? 18 : 2,
+                    width: 16,
+                    height: 16,
+                    borderRadius: "50%",
+                    background: "white",
+                    transition: "left 0.2s",
+                  }}
+                />
+              </button>
+            </div>
             {/* Buy-in confirmation toggle */}
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>Require buy-in</span>
