@@ -15,7 +15,7 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
     .from("pools")
     .select("*, tournament:tournaments(*)")
     .eq("id", id)
-    .single<Pool & { tournament: { name: string; course: string; status: string; current_round: number | null } }>();
+    .single<Pool & { tournament: { name: string; course: string; status: string; current_round: number | null; par: number } }>();
 
   if (!pool) redirect("/");
   if (!pool.is_public && !authUser) redirect("/auth/login");
@@ -42,7 +42,8 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
     (entries ?? []) as PoolEntry[],
     (players ?? []) as TournamentPlayer[],
     pool as Pool,
-    usersMap
+    usersMap,
+    pool.tournament?.par ?? 72
   );
 
   const isAdmin = authUser ? pool.organizer_id === authUser.id : false;

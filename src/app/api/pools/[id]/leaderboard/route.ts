@@ -9,9 +9,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
   const { data: pool } = await supabase
     .from("pools")
-    .select("*")
+    .select("*, tournament:tournaments(par)")
     .eq("id", id)
-    .single<Pool>();
+    .single<Pool & { tournament: { par: number } }>();
 
   if (!pool) return NextResponse.json({ error: "Pool not found" }, { status: 404 });
 
@@ -36,7 +36,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     (entries ?? []) as PoolEntry[],
     (players ?? []) as TournamentPlayer[],
     pool,
-    usersMap
+    usersMap,
+    pool.tournament?.par ?? 72
   );
 
   return NextResponse.json({ leaderboard });

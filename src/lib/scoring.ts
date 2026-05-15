@@ -1,5 +1,4 @@
 import type { Pool, PoolEntry, TournamentPlayer, LeaderboardRow } from "@/types";
-import { PAR } from "@/lib/espn";
 
 type Round = 1 | 2 | 3 | 4;
 
@@ -28,7 +27,8 @@ export function computeLeaderboard(
   entries: PoolEntry[],
   players: TournamentPlayer[],
   pool: Pool,
-  usersMap: Record<string, { display_name: string }>
+  usersMap: Record<string, { display_name: string }>,
+  par = 72
 ): LeaderboardRow[] {
   const playerMap = Object.fromEntries(players.map((p) => [p.id, p]));
 
