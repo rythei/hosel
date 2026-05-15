@@ -1,8 +1,9 @@
-const PAR = 70;
+export const PAR = 70;
 
 export interface ESPNPlayerScore {
   name: string;
   roundPars: (number | null)[];
+  roundsComplete: boolean[]; // true only when all 18 holes are confirmed (not a live estimate)
   totalPar: number | null;
   thru: string;
   cut: "Y" | "N" | "WD" | "DQ" | "";
@@ -54,6 +55,7 @@ function parseCompetitor(c: ESPNCompetitor, allCompetitors: ESPNCompetitor[]): E
 
   // Per-round to-par
   const roundPars: (number | null)[] = [null, null, null, null];
+  const roundsComplete: boolean[] = [false, false, false, false];
   const linescores = c.linescores ?? [];
   let thruHoles = 0;
 
@@ -68,6 +70,7 @@ function parseCompetitor(c: ESPNCompetitor, allCompetitors: ESPNCompetitor[]): E
 
     if (holeScores === 18 && rawStrokes !== null) {
       roundPars[roundIdx] = rawStrokes - PAR;
+      roundsComplete[roundIdx] = true; // confirmed 18 holes, not a live estimate
     }
   }
 
@@ -109,5 +112,5 @@ function parseCompetitor(c: ESPNCompetitor, allCompetitors: ESPNCompetitor[]): E
     }
   }
 
-  return { name, roundPars, totalPar, thru: thruDisplay, cut };
+  return { name, roundPars, roundsComplete, totalPar, thru: thruDisplay, cut };
 }
