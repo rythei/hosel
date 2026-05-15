@@ -453,7 +453,8 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
 
       {/* Scoring rules note */}
       {(() => {
-        const perRound = pool.scoring_method === "best_3_of_5" ? "Best 3 of 5" : pool.scoring_method === "best_4_of_5" ? "Best 4 of 5" : "All 5";
+        const n = pool.num_tiers;
+        const perRound = pool.scoring_method === "best_3_of_5" ? `Best 3 of ${n}` : pool.scoring_method === "best_4_of_5" ? `Best 4 of ${n}` : `All ${n}`;
         const totalMethod = pool.total_scoring_method === "best_players_overall"
           ? `Overall score = sum of the ${pool.scoring_method === "best_4_of_5" ? "4" : pool.scoring_method === "all_5" ? "5" : "3"} best players' tournament totals.`
           : "Overall score = sum of each round's best players.";
