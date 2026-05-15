@@ -1,6 +1,37 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { fetchESPNScores } from "@/lib/espn";
+import { fetchESPNScores, type ESPNPlayerScore } from "@/lib/espn";
+
+// A player is "done" with a given round if they have a confirmed score,
+// missed the cut (excused from R3/R4), or withdrew/were DQ'd.
+function playerDoneWithRound(score: ESPNPlayerScore, roundIdx: number): boolean {
+  if (score.roundsComplete[roundIdx]) return true;
+  if (score.cut === "N" && roundIdx >= 2) return true; // missed cut, skip R3/R4
+  if (score.cut === "WD" || score.cut === "DQ") return true;
+  return false;
+}
+
+// A round is complete when at least one player has a confirmed score AND
+// every player in the field is done with it.
+function isRoundComplete(scores: ESPNPlayerScore[], roundIdx: number): boolean {
+  const hasConfirmedData = scores.some((s) => s.roundsComplete[roundIdx]);
+  if (!hasConfirmedData) return false;
+  return scores.every((s) => playerDoneWithRound(s, roundIdx));
+}
+
+// Returns the new current_round (1–4) and whether the tournament is now complete.
+function detectRoundProgress(scores: ESPNPlayerScore[]): { currentRound: number; isComplete: boolean } {
+  let currentRound = 1;
+  for (let r = 0; r < 4; r++) {
+    if (isRoundComplete(scores, r)) {
+      currentRound = r + 2; // advance to the next round
+    } else {
+      break;
+    }
+  }
+  const isComplete = currentRound > 4;
+  return { currentRound: Math.min(currentRound, 4), isComplete };
+}
 
 // Vercel cron calls this route — see vercel.json
 export async function GET(request: Request) {
@@ -56,7 +87,13 @@ export async function GET(request: Request) {
           .eq("name", score.name);
       }
 
-      results.push({ tournament: tournament.name, players: scores.length });
+      // Detect round progression and update the tournament row
+      const { currentRound, isComplete } = detectRoundProgress(scores);
+      const tournamentUpdate: Record<string, unknown> = { current_round: currentRound };
+      if (isComplete) tournamentUpdate.status = "complete";
+      await supabase.from("tournaments").update(tournamentUpdate).eq("id", tournament.id);
+
+      results.push({ tournament: tournament.name, players: scores.length, currentRound, isComplete });
     } catch (err) {
       results.push({ tournament: tournament.name, error: String(err) });
     }

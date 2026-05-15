@@ -1,4 +1,5 @@
 import type { Pool, PoolEntry, TournamentPlayer, LeaderboardRow } from "@/types";
+import { PAR } from "@/lib/espn";
 
 type Round = 1 | 2 | 3 | 4;
 
@@ -89,29 +90,65 @@ export function computeLeaderboard(
     };
   });
 
-  // Sort by total score ascending (lower is better), tiebreaker as secondary
+  // Compute the actual lowest score (relative to par) per round across all players
+  const actualLowRelative: Record<"r1" | "r2" | "r3" | "r4", number | null> = { r1: null, r2: null, r3: null, r4: null };
+  for (const p of players) {
+    (["r1", "r2", "r3", "r4"] as const).forEach((rk) => {
+      const s = p[`${rk}_score` as keyof TournamentPlayer] as number | null;
+      if (s !== null) actualLowRelative[rk] = actualLowRelative[rk] === null ? s : Math.min(actualLowRelative[rk]!, s);
+    });
+  }
+  // Convert to absolute strokes for comparison against tiebreaker guesses
+  const actualLowStrokes: Record<"r1" | "r2" | "r3" | "r4", number | null> = {
+    r1: actualLowRelative.r1 !== null ? actualLowRelative.r1 + PAR : null,
+    r2: actualLowRelative.r2 !== null ? actualLowRelative.r2 + PAR : null,
+    r3: actualLowRelative.r3 !== null ? actualLowRelative.r3 + PAR : null,
+    r4: actualLowRelative.r4 !== null ? actualLowRelative.r4 + PAR : null,
+  };
+
+  // Tiebreaker comparison for a given round:
+  // 1st: closest predicted score to actual daily low (abs diff, lower = better)
+  // 2nd: entry picked a player who actually shot the daily low
+  function tbCompare(a: LeaderboardRow, b: LeaderboardRow, rk: "r1" | "r2" | "r3" | "r4"): number {
+    const actualLow = actualLowStrokes[rk];
+    const actualLowRel = actualLowRelative[rk];
+    const ta = a.tiebreaker[rk];
+    const tb = b.tiebreaker[rk];
+
+    if (ta !== null && tb !== null && actualLow !== null) {
+      const diffA = Math.abs(ta - actualLow);
+      const diffB = Math.abs(tb - actualLow);
+      if (diffA !== diffB) return diffA - diffB;
+      // Same diff → did they pick the player who shot the actual low?
+      if (actualLowRel !== null) {
+        const aPickedLow = a.picks.some((p) => p[rk] === actualLowRel);
+        const bPickedLow = b.picks.some((p) => p[rk] === actualLowRel);
+        if (aPickedLow !== bPickedLow) return aPickedLow ? -1 : 1;
+      }
+    }
+    if (ta !== null && actualLow !== null) return -1;
+    if (tb !== null && actualLow !== null) return 1;
+    return 0;
+  }
+
+  // Sort: total score ASC, then R1 tiebreaker
   rows.sort((a, b) => {
     if (a.total_score === null && b.total_score === null) return 0;
     if (a.total_score === null) return 1;
     if (b.total_score === null) return -1;
     if (a.total_score !== b.total_score) return a.total_score - b.total_score;
-
-    // Tied on total — use tiebreaker for the most recent round played (lower guess wins)
-    const rounds: Array<"r4" | "r3" | "r2" | "r1"> = ["r4", "r3", "r2", "r1"];
-    for (const r of rounds) {
-      const ta = a.tiebreaker[r];
-      const tb = b.tiebreaker[r];
-      if (ta !== null && tb !== null) return ta - tb;
-      if (ta !== null) return -1;
-      if (tb !== null) return 1;
-    }
-    return 0;
+    return tbCompare(a, b, "r1");
   });
 
-  // Assign ranks
+  // Assign ranks — same rank only when both tiebreakers also resolve to a tie
+  function areTied(a: LeaderboardRow, b: LeaderboardRow): boolean {
+    if (a.total_score !== b.total_score) return false;
+    return tbCompare(a, b, "r1") === 0;
+  }
+
   let rank = 1;
   for (let i = 0; i < rows.length; i++) {
-    if (i > 0 && rows[i].total_score === rows[i - 1].total_score) {
+    if (i > 0 && areTied(rows[i], rows[i - 1])) {
       rows[i].rank = rows[i - 1].rank;
     } else {
       rows[i].rank = rank;
