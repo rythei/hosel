@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { TokenAmount } from "@/components/HoselLogo";
 import { createClient } from "@/lib/supabase/client";
 import type { Pool, LeaderboardRow } from "@/types";
 
-type RoundTab = "R1" | "R2" | "R3" | "R4" | "Total";
+type SortBy = "total" | "r1" | "r2" | "r3" | "r4";
 
 interface Props {
   pool: Pool & { tournament: { name: string; course: string; status: string; current_round: number | null } };
@@ -77,7 +77,7 @@ function computeWinnings(
 export function LeaderboardClient({ pool, leaderboard: initial, entryCount, totalPot, isAdmin, poolId, isPublic, hasEntry, isAuthenticated }: Props) {
   const [rows, setRows] = useState<LeaderboardRow[]>(initial);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<RoundTab>("Total");
+  const [sortBy, setSortBy] = useState<SortBy>("total");
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -102,7 +102,34 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
     return () => { supabase.removeChannel(channel); };
   }, [poolId]);
 
-  const leader = rows[0];
+  // Sort rows by selected column; server provides total-sorted order by default
+  const sortedRows = useMemo(() => {
+    if (sortBy === "total") return rows;
+    const key = `${sortBy}_score` as "r1_score" | "r2_score" | "r3_score" | "r4_score";
+    return [...rows].sort((a, b) => {
+      const va = a[key] as number | null;
+      const vb = b[key] as number | null;
+      if (va === null && vb === null) return 0;
+      if (va === null) return 1;
+      if (vb === null) return -1;
+      return va - vb;
+    });
+  }, [rows, sortBy]);
+
+  // Compute display ranks for current sort (with ties)
+  const displayRanks = useMemo(() => {
+    if (sortBy === "total") return sortedRows.map((r) => r.rank);
+    const key = `${sortBy}_score` as "r1_score" | "r2_score" | "r3_score" | "r4_score";
+    const ranks: number[] = [];
+    let rank = 1;
+    for (let i = 0; i < sortedRows.length; i++) {
+      if (i > 0 && sortedRows[i][key] !== sortedRows[i - 1][key]) rank = i + 1;
+      ranks.push(rank);
+    }
+    return ranks;
+  }, [sortedRows, sortBy]);
+
+  const leader = sortedRows[0];
   const isLive = pool.tournament.status === "in_progress";
 
   const roundPct = pool.payout_structure.rounds.percentage;
@@ -136,8 +163,26 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
   // Desktop: rank / name / R1 / R2 / R3 / R4 / Total / Won
   // Mobile: rank / name / (active round) / Total / Won
   const gridCols = isMobile
-    ? activeTab === "Total" ? "28px 1fr 52px 60px" : "28px 1fr 40px 48px 60px"
+    ? sortBy === "total" ? "28px 1fr 52px 60px" : "28px 1fr 40px 48px 60px"
     : "28px 1fr 36px 36px 36px 36px 48px 56px";
+
+  const ROUND_KEYS: SortBy[] = ["r1", "r2", "r3", "r4"];
+  const colHeaderStyle = (col: SortBy): React.CSSProperties => ({
+    textAlign: "center" as const,
+    cursor: "pointer",
+    color: sortBy === col ? "var(--green-light)" : "var(--text-dim)",
+    fontWeight: sortBy === col ? 800 : 600,
+    background: "none",
+    border: "none",
+    padding: 0,
+    fontSize: "var(--text-xs)",
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.5px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 2,
+  });
 
   return (
     <div style={{ paddingBottom: 32 }}>
@@ -207,8 +252,10 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
       {isMobile && (
         <div style={{ padding: "0 24px", marginBottom: 16 }}>
           <div className="tab-bar">
-            {(["R1", "R2", "R3", "R4", "Total"] as RoundTab[]).map((r) => (
-              <button key={r} className={`tab ${activeTab === r ? "active" : ""}`} onClick={() => setActiveTab(r)}>{r}</button>
+            {(["r1", "r2", "r3", "r4", "total"] as SortBy[]).map((s) => (
+              <button key={s} className={`tab ${sortBy === s ? "active" : ""}`} onClick={() => setSortBy(s)}>
+                {s === "total" ? "Total" : s.toUpperCase()}
+              </button>
             ))}
           </div>
         </div>
@@ -217,32 +264,39 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
       {/* Leaderboard Table */}
       <div style={{ padding: "0 24px" }}>
         {/* Header */}
-        <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 4, padding: "0 12px 8px", fontSize: "var(--text-xs)", color: "var(--text-dim)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: gridCols, gap: 4, padding: "0 12px 8px", fontSize: "var(--text-xs)", color: "var(--text-dim)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", alignItems: "center" }}>
           <span>#</span>
           <span>Player</span>
           {isMobile ? (
             <>
-              {activeTab !== "Total" && <span style={{ textAlign: "center" }}>{activeTab}</span>}
-              <span style={{ textAlign: "right" }}>Total</span>
+              {sortBy !== "total" && <span style={{ textAlign: "center", color: "var(--green-light)", fontWeight: 800 }}>{sortBy.toUpperCase()}</span>}
+              <button onClick={() => setSortBy("total")} style={{ ...colHeaderStyle("total"), justifyContent: "flex-end" }}>
+                Total{sortBy === "total" && " ▲"}
+              </button>
             </>
           ) : (
             <>
-              {["R1","R2","R3","R4"].map((r) => (
-                <span key={r} style={{ textAlign: "center" }}>{r}</span>
+              {ROUND_KEYS.map((rk) => (
+                <button key={rk} onClick={() => setSortBy(sortBy === rk ? "total" : rk)} style={colHeaderStyle(rk)}>
+                  {rk.toUpperCase()}{sortBy === rk && " ▲"}
+                </button>
               ))}
-              <span style={{ textAlign: "right" }}>Total</span>
+              <button onClick={() => setSortBy("total")} style={{ ...colHeaderStyle("total"), justifyContent: "flex-end" }}>
+                Total{sortBy === "total" && " ▲"}
+              </button>
             </>
           )}
           <span style={{ textAlign: "right" }}>Won</span>
         </div>
 
-        {rows.map((row, idx) => {
-          const isFirst = row.rank === 1;
-          const isTop3 = row.rank <= 3;
+        {sortedRows.map((row, idx) => {
+          const displayRank = displayRanks[idx];
+          const isFirst = displayRank === 1;
+          const isTop3 = displayRank <= 3;
           const isExpanded = expandedRow === row.entry_id;
           const won = winnings[row.entry_id] ?? 0;
 
-          const isTiedWithPrev = tbWinnerIds.has(row.entry_id);
+          const isTiedWithPrev = sortBy === "total" && tbWinnerIds.has(row.entry_id);
 
           return (
             <div key={row.entry_id} style={{ marginBottom: 4 }}>
@@ -253,7 +307,7 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
               >
                 {/* Rank */}
                 <span style={{ fontWeight: 800, fontSize: "var(--text-base)", color: isFirst ? "var(--gold)" : isTop3 ? "var(--green-light)" : "var(--text-muted)" }}>
-                  {row.rank}
+                  {displayRank}
                 </span>
 
                 {/* Name + picks preview */}
@@ -273,8 +327,9 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
 
                 {/* Round scores — all inline on desktop, active tab only on mobile */}
                 {isMobile ? (
-                  activeTab !== "Total" && (() => {
-                    const rs = activeTab === "R1" ? row.r1_score : activeTab === "R2" ? row.r2_score : activeTab === "R3" ? row.r3_score : row.r4_score;
+                  sortBy !== "total" && (() => {
+                    const key = `${sortBy}_score` as "r1_score" | "r2_score" | "r3_score" | "r4_score";
+                    const rs = row[key] as number | null;
                     return <span style={{ textAlign: "center", fontFamily: "monospace", fontSize: "var(--text-sm)", fontWeight: 500, color: rs === null ? "var(--text-dim)" : "var(--text)" }}>{formatScore(rs)}</span>;
                   })()
                 ) : (
@@ -333,8 +388,8 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
                           const allRoundScores = row.picks.map((p) => p[roundKey]);
                           const countingSet = getCountingIndices(allRoundScores, pool.scoring_method);
                           const isCounting = score !== null && countingSet.has(pickIdx);
-                          const isActiveRound = activeTab === `R${rIdx + 1}`;
-                          const isVisible = !isMobile || activeTab === "Total" || isActiveRound;
+                          const isActiveRound = sortBy === `r${rIdx + 1}`;
+                          const isVisible = !isMobile || sortBy === "total" || isActiveRound;
                           return (
                             <span
                               key={rIdx}
