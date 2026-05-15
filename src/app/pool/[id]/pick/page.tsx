@@ -51,7 +51,7 @@ export default async function PickPlayersPage({ params }: { params: Promise<{ id
   if (pool.status === "locked" || pool.status === "complete" || pool.status === "settling" || pool.status === "settled") {
     return (
       <>
-        <NavBar poolName={pool.name} poolId={id} />
+        <NavBar poolName={pool.name} poolId={id} poolStatus={pool.status} />
         <div style={{ padding: "64px 24px", textAlign: "center" }}>
           <div style={{ fontSize: 40, marginBottom: 16 }}>🔒</div>
           <h1 style={{ fontSize: "var(--text-xl)", fontWeight: 800, color: "var(--cream)", marginBottom: 8 }}>
@@ -84,7 +84,7 @@ export default async function PickPlayersPage({ params }: { params: Promise<{ id
 
   return (
     <>
-      <NavBar poolName={pool.name} poolId={id} />
+      <NavBar poolName={pool.name} poolId={id} poolStatus={pool.status} />
       <PickPlayersClient
         pool={pool as Pool & { tournament: { name: string; course: string; start_date: string } }}
         entry={entry}
