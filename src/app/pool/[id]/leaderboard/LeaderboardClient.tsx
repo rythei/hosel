@@ -359,6 +359,11 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
                     );
                   })}
 
+                  {/* Scoring method note */}
+                  <div style={{ marginTop: 6, marginBottom: 2, fontSize: 10, color: "var(--text-dim)", fontStyle: "italic" }}>
+                    {pool.scoring_method === "best_3_of_5" ? "Best 3" : pool.scoring_method === "best_4_of_5" ? "Best 4" : "All"} player scores count each round — highlighted in green
+                  </div>
+
                   {/* Tiebreaker row */}
                   <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                     <span style={{ fontSize: 10, color: "var(--text-dim)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>Tiebreaker</span>
@@ -393,8 +398,8 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
       {/* Scoring rules note */}
       <div style={{ margin: "20px 24px 0", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "12px 16px", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
         <span style={{ fontWeight: 600, color: "var(--cream)" }}>Scoring: </span>
-        {pool.scoring_method.replace(/_/g, " ")} player scores each day.
-        Need {pool.cut_rule_minimum}+ players to make the cut for R3/R4 &amp; overall eligibility.
+        {pool.scoring_method.replace(/_/g, " ")} player scores count each round, summed across all rounds.
+        {" "}Need {pool.cut_rule_minimum}+ players to make the cut to compete in R3/R4 &amp; overall.
         Tiebreaker = closest predicted daily low score wins ties.
       </div>
 
