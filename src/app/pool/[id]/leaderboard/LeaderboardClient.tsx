@@ -301,23 +301,36 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
               </div>
 
               {/* Expanded breakdown */}
-              {isExpanded && (
+              {isExpanded && (() => {
+                // Compute each player's cumulative score and who counts toward the total
+                const playerCumulatives: (number | null)[] = row.picks.map((pick) => {
+                  const vals = [pick.r1, pick.r2, pick.r3, pick.r4].filter((s): s is number => s !== null);
+                  return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) : null;
+                });
+                const countingForTotal = getCountingIndices(playerCumulatives, pool.scoring_method);
+                const n = pool.scoring_method === "best_3_of_5" ? 3 : pool.scoring_method === "best_4_of_5" ? 4 : row.picks.length;
+                const expandedGrid = "1fr 38px 38px 38px 38px 52px";
+
+                return (
                 <div style={{ background: "var(--surface)", border: isFirst ? "1px solid rgba(138,96,48,0.15)" : "1px solid var(--border)", borderTop: "none", borderRadius: "0 0 var(--radius-lg) var(--radius-lg)", padding: "8px 12px 12px" }}>
                   {/* Sub-header */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 48px 48px 48px 48px", gap: 4, padding: "4px 0 6px", borderBottom: "1px solid var(--border)", marginBottom: 6 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: expandedGrid, gap: 4, padding: "4px 0 6px", borderBottom: "1px solid var(--border)", marginBottom: 6 }}>
                     <span style={{ fontSize: 10, color: "var(--text-dim)", fontWeight: 600, textTransform: "uppercase" }}>Player</span>
                     {["R1","R2","R3","R4"].map((r) => (
                       <span key={r} style={{ fontSize: 10, color: "var(--text-dim)", fontWeight: 600, textAlign: "center", textTransform: "uppercase" }}>{r}</span>
                     ))}
+                    <span style={{ fontSize: 10, color: "var(--green-light)", fontWeight: 600, textAlign: "center", textTransform: "uppercase" }}>Total</span>
                   </div>
 
                   {row.picks.map((pick, pickIdx) => {
                     const isCut = pick.status === "cut";
                     const isOut = pick.status === "withdrawn" || pick.status === "disqualified";
                     const roundScores = [pick.r1, pick.r2, pick.r3, pick.r4];
+                    const cumulative = playerCumulatives[pickIdx];
+                    const countsForTotal = countingForTotal.has(pickIdx);
 
                     return (
-                      <div key={pick.player_name} style={{ display: "grid", gridTemplateColumns: "1fr 48px 48px 48px 48px", gap: 4, padding: "5px 0", borderBottom: "1px solid rgba(255,255,255,0.04)", alignItems: "center" }}>
+                      <div key={pick.player_name} style={{ display: "grid", gridTemplateColumns: expandedGrid, gap: 4, padding: "5px 0", borderBottom: "1px solid rgba(255,255,255,0.04)", alignItems: "center" }}>
                         <div>
                           <span style={{ fontSize: "var(--text-xs)", color: isCut || isOut ? "var(--text-dim)" : "var(--cream)", fontWeight: 500 }}>
                             {pick.player_name}
@@ -355,9 +368,28 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
                             </span>
                           );
                         })}
+                        {/* Cumulative total for this player */}
+                        <span style={{
+                          textAlign: "center",
+                          fontFamily: "monospace",
+                          fontSize: "var(--text-xs)",
+                          fontWeight: countsForTotal ? 700 : 400,
+                          color: cumulative === null ? "var(--text-dim)" : countsForTotal ? "var(--green-light)" : "var(--text-muted)",
+                          borderRadius: countsForTotal ? 4 : 0,
+                          background: countsForTotal ? "rgba(52,122,74,0.12)" : "transparent",
+                          padding: countsForTotal ? "1px 4px" : 0,
+                          outline: countsForTotal ? "1px solid rgba(52,122,74,0.35)" : "none",
+                        }}>
+                          {formatScore(cumulative)}
+                        </span>
                       </div>
                     );
                   })}
+
+                  {/* Scoring method note */}
+                  <div style={{ marginTop: 6, marginBottom: 2, fontSize: 10, color: "var(--text-dim)", fontStyle: "italic" }}>
+                    Total = best {n} of {row.picks.length} players by cumulative score
+                  </div>
 
                   {/* Tiebreaker row */}
                   <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -380,7 +412,8 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
                     )}
                   </div>
                 </div>
-              )}
+                );
+              })()}
             </div>
           );
         })}
