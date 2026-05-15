@@ -56,7 +56,7 @@ function computeWinnings(
 
   (["r1_score", "r2_score", "r3_score", "r4_score"] as const).forEach((key, i) => {
     if (!isComplete(i + 1)) return; // skip rounds still in progress
-    const eligible = rows.filter((r) => r[key] !== null);
+    const eligible = rows.filter((r) => r[key] !== null && (i < 2 || r.is_eligible_weekend));
     if (eligible.length === 0) return;
     const sorted = [...eligible].sort((a, b) => (a[key] as number) - (b[key] as number));
     ([splits.first, splits.second, splits.third] as number[]).forEach((pct, idx) => {
