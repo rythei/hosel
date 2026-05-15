@@ -60,7 +60,7 @@ export function NavBar({ poolName, poolId, poolStatus, isAdmin }: NavBarProps) {
     >
       {/* Left: Logo */}
       <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-        <HoselLogo size={36} />
+        <HoselLogo size={52} />
         {isAdmin && (
           <span
             className="badge"
