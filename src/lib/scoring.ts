@@ -111,10 +111,10 @@ export function computeLeaderboard(
   }
   // Convert to absolute strokes for comparison against tiebreaker guesses
   const actualLowStrokes: Record<"r1" | "r2" | "r3" | "r4", number | null> = {
-    r1: actualLowRelative.r1 !== null ? actualLowRelative.r1 + PAR : null,
-    r2: actualLowRelative.r2 !== null ? actualLowRelative.r2 + PAR : null,
-    r3: actualLowRelative.r3 !== null ? actualLowRelative.r3 + PAR : null,
-    r4: actualLowRelative.r4 !== null ? actualLowRelative.r4 + PAR : null,
+    r1: actualLowRelative.r1 !== null ? actualLowRelative.r1 + par : null,
+    r2: actualLowRelative.r2 !== null ? actualLowRelative.r2 + par : null,
+    r3: actualLowRelative.r3 !== null ? actualLowRelative.r3 + par : null,
+    r4: actualLowRelative.r4 !== null ? actualLowRelative.r4 + par : null,
   };
 
   // Tiebreaker comparison for a given round:
