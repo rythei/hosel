@@ -1,4 +1,4 @@
-const PAR = 72;
+const PAR = 70;
 
 export interface ESPNPlayerScore {
   name: string;

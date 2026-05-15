@@ -85,15 +85,27 @@ export function computeLeaderboard(
       r4_score: roundScores[3],
       total_score: totalScore,
       is_eligible_weekend: isEligibleWeekend,
+      tiebreaker: entry.tiebreaker ?? { r1: null, r2: null, r3: null, r4: null },
     };
   });
 
-  // Sort by total score ascending (lower is better in golf)
+  // Sort by total score ascending (lower is better), tiebreaker as secondary
   rows.sort((a, b) => {
     if (a.total_score === null && b.total_score === null) return 0;
     if (a.total_score === null) return 1;
     if (b.total_score === null) return -1;
-    return a.total_score - b.total_score;
+    if (a.total_score !== b.total_score) return a.total_score - b.total_score;
+
+    // Tied on total — use tiebreaker for the most recent round played (lower guess wins)
+    const rounds: Array<"r4" | "r3" | "r2" | "r1"> = ["r4", "r3", "r2", "r1"];
+    for (const r of rounds) {
+      const ta = a.tiebreaker[r];
+      const tb = b.tiebreaker[r];
+      if (ta !== null && tb !== null) return ta - tb;
+      if (ta !== null) return -1;
+      if (tb !== null) return 1;
+    }
+    return 0;
   });
 
   // Assign ranks

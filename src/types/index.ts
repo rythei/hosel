@@ -137,4 +137,5 @@ export interface LeaderboardRow {
   r4_score: number | null;
   total_score: number | null;
   is_eligible_weekend: boolean;
+  tiebreaker: { r1: number | null; r2: number | null; r3: number | null; r4: number | null };
 }
