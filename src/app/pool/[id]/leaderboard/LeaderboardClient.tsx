@@ -452,12 +452,21 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
       </div>
 
       {/* Scoring rules note */}
-      <div style={{ margin: "20px 24px 0", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "12px 16px", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
-        <span style={{ fontWeight: 600, color: "var(--cream)" }}>Scoring: </span>
-        {pool.scoring_method.replace(/_/g, " ")} player scores count each round, summed across all rounds.
-        {" "}Need {pool.cut_rule_minimum}+ players to make the cut to compete in R3/R4 &amp; overall.
-        Tiebreaker = closest predicted daily low score wins ties.
-      </div>
+      {(() => {
+        const perRound = pool.scoring_method === "best_3_of_5" ? "Best 3 of 5" : pool.scoring_method === "best_4_of_5" ? "Best 4 of 5" : "All 5";
+        const totalMethod = pool.total_scoring_method === "best_players_overall"
+          ? `Overall score = sum of the ${pool.scoring_method === "best_4_of_5" ? "4" : pool.scoring_method === "all_5" ? "5" : "3"} best players' tournament totals.`
+          : "Overall score = sum of each round's best players.";
+        return (
+          <div style={{ margin: "20px 24px 0", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "12px 16px", fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
+            <span style={{ fontWeight: 600, color: "var(--cream)" }}>Scoring: </span>
+            {perRound} player scores count per round.
+            {" "}{totalMethod}
+            {" "}Need {pool.cut_rule_minimum}+ players to make the cut to compete in R3/R4 &amp; overall.
+            {" "}Tiebreaker: closest predicted daily low score wins ties.
+          </div>
+        );
+      })()}
 
       {isAdmin && (
         <div style={{ margin: "16px 24px 0", textAlign: "center" }}>
