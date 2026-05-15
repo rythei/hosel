@@ -176,7 +176,7 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "32px 1fr 48px 48px 48px 48px 60px",
+            gridTemplateColumns: activeTab === "Total" ? "28px 1fr 64px" : "28px 1fr 44px 60px",
             gap: 4,
             padding: "0 12px 8px",
             fontSize: "var(--text-xs)",
@@ -188,10 +188,7 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
         >
           <span>#</span>
           <span>Player</span>
-          <span style={{ textAlign: "center" }}>R1</span>
-          <span style={{ textAlign: "center" }}>R2</span>
-          <span style={{ textAlign: "center" }}>R3</span>
-          <span style={{ textAlign: "center" }}>R4</span>
+          {activeTab !== "Total" && <span style={{ textAlign: "center" }}>{activeTab}</span>}
           <span style={{ textAlign: "right" }}>Total</span>
         </div>
 
@@ -200,6 +197,11 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
           const isFirst = row.rank === 1;
           const isTop3 = row.rank <= 3;
           const isExpanded = expandedRow === row.entry_id;
+          const roundScore = activeTab === "R1" ? row.r1_score
+            : activeTab === "R2" ? row.r2_score
+            : activeTab === "R3" ? row.r3_score
+            : activeTab === "R4" ? row.r4_score
+            : null;
           return (
             <div key={row.entry_id} style={{ marginBottom: 4 }}>
               {/* Main row */}
@@ -207,7 +209,7 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
                 onClick={() => setExpandedRow(isExpanded ? null : row.entry_id)}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "32px 1fr 48px 48px 48px 48px 60px",
+                  gridTemplateColumns: activeTab === "Total" ? "28px 1fr 64px" : "28px 1fr 44px 60px",
                   gap: 4,
                   padding: "12px",
                   borderRadius: isExpanded ? "var(--radius-lg) var(--radius-lg) 0 0" : "var(--radius-lg)",
@@ -221,20 +223,20 @@ export function LeaderboardClient({ pool, leaderboard: initial, entryCount, tota
                   {row.rank}
                 </span>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: "var(--text-md)", fontWeight: 600, color: "var(--cream)", display: "flex", alignItems: "center", gap: 4 }}>
-                    {isFirst && <span style={{ fontSize: 11 }}>🏆</span>}
-                    {row.display_name}
-                    <span style={{ fontSize: 10, color: "var(--text-dim)", marginLeft: 2 }}>{isExpanded ? "▲" : "▼"}</span>
+                  <div style={{ fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--cream)", display: "flex", alignItems: "center", gap: 4, overflow: "hidden" }}>
+                    {isFirst && <span style={{ fontSize: 11, flexShrink: 0 }}>🏆</span>}
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.display_name}</span>
+                    <span style={{ fontSize: 10, color: "var(--text-dim)", flexShrink: 0 }}>{isExpanded ? "▲" : "▼"}</span>
                   </div>
                   <div style={{ fontSize: 10, color: "var(--text-dim)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {row.picks.map((p) => p.player_name).join(" · ")}
                   </div>
                 </div>
-                {([row.r1_score, row.r2_score, row.r3_score, row.r4_score] as (number | null)[]).map((score, i) => (
-                  <span key={i} style={{ textAlign: "center", fontFamily: "monospace", fontSize: "var(--text-base)", fontWeight: 500, color: score === null ? "var(--text-dim)" : "var(--text)", opacity: activeTab === `R${i + 1}` ? 1 : activeTab === "Total" ? 1 : 0.4 }}>
-                    {formatScore(score)}
+                {activeTab !== "Total" && (
+                  <span style={{ textAlign: "center", fontFamily: "monospace", fontSize: "var(--text-sm)", fontWeight: 500, color: roundScore === null ? "var(--text-dim)" : "var(--text)" }}>
+                    {formatScore(roundScore)}
                   </span>
-                ))}
+                )}
                 <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 15, fontWeight: 800, color: isFirst ? "var(--gold)" : isTop3 ? "var(--green-light)" : "var(--text)" }}>
                   {formatScore(row.total_score)}
                 </span>

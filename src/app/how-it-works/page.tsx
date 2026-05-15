@@ -6,7 +6,7 @@ const sections = [
     icon: "🏆",
     title: "What is Hosel?",
     content: [
-      "Hosel is a pick'em pool platform built around PGA Tour events. You and your crew each pick one golfer from five tiers, and whoever has the best lineup at the end of the tournament wins.",
+      "Hosel is a pick'em pool platform built around PGA Tour events. You and your crew each pick one golfer from a set of tiers, and whoever has the best lineup at the end of the tournament wins.",
       "It's the same format you'd run on a spreadsheet — just faster to set up, automatic scoring, and no manual math.",
     ],
   },
@@ -32,7 +32,7 @@ const sections = [
     icon: "🏌️",
     title: "Picking your players",
     content: [
-      "Each pool has 5 tiers. Tier 1 is the top-ranked favorites, Tier 5 is the longshots. You pick exactly one player from each tier.",
+      "Each pool has tiers set by the organizer. Tier 1 is the top-ranked favorites, the last tier is the longshots. You pick exactly one player from each tier.",
       "Your picks are private until the organizer locks the pool. After that, no changes can be made.",
       "If you haven't submitted picks before the deadline, you'll be locked out — so don't wait.",
     ],
