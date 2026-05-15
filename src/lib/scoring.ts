@@ -48,9 +48,20 @@ export function computeLeaderboard(
       }
     }
 
-    const computed = roundScores.filter((s): s is number => s !== null);
-    if (computed.length > 0) {
-      totalScore = computed.reduce((a, b) => a + b, 0);
+    // Total = best-X of each player's cumulative score across all completed rounds.
+    // e.g. best_3_of_5 picks the 3 players with the lowest combined R1+R2+... score,
+    // NOT the sum of per-round best-3 results (which could count different players each round).
+    const playerCumulatives: (number | null)[] = pickedPlayers.map((p) => {
+      let sum = 0;
+      let hasAny = false;
+      for (let r = 1; r <= 4; r++) {
+        const s = getRoundScore(p, r as Round);
+        if (s !== null) { sum += s; hasAny = true; }
+      }
+      return hasAny ? sum : null;
+    });
+    if (playerCumulatives.some((s) => s !== null)) {
+      totalScore = computeRoundTotal(playerCumulatives, pool.scoring_method);
     }
 
     // Weekend eligibility: X+ players making the cut
