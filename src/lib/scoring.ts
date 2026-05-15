@@ -147,19 +147,25 @@ export function computeLeaderboard(
     return 0;
   }
 
-  // Sort: total score ASC, then R1 tiebreaker
+  // Use the most recently active round's tiebreaker (highest round with score data)
+  const activeTbRound: "r1" | "r2" | "r3" | "r4" =
+    actualLowRelative.r4 !== null ? "r4" :
+    actualLowRelative.r3 !== null ? "r3" :
+    actualLowRelative.r2 !== null ? "r2" : "r1";
+
+  // Sort: total score ASC, then current round's tiebreaker
   rows.sort((a, b) => {
     if (a.total_score === null && b.total_score === null) return 0;
     if (a.total_score === null) return 1;
     if (b.total_score === null) return -1;
     if (a.total_score !== b.total_score) return a.total_score - b.total_score;
-    return tbCompare(a, b, "r1");
+    return tbCompare(a, b, activeTbRound);
   });
 
   // Assign ranks — same rank only when both tiebreakers also resolve to a tie
   function areTied(a: LeaderboardRow, b: LeaderboardRow): boolean {
     if (a.total_score !== b.total_score) return false;
-    return tbCompare(a, b, "r1") === 0;
+    return tbCompare(a, b, activeTbRound) === 0;
   }
 
   let rank = 1;
