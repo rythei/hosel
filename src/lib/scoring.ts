@@ -37,10 +37,18 @@ export function computeLeaderboard(
       .map((pid) => playerMap[pid as string])
       .filter(Boolean);
 
+    // Weekend eligibility must be computed first so R3/R4 scores can be suppressed
+    const madeCut = pickedPlayers.filter(
+      (p) => p.status !== "cut" && p.status !== "withdrawn" && p.status !== "disqualified"
+    ).length;
+    const isEligibleWeekend = madeCut >= pool.cut_rule_minimum;
+
     const roundScores: (number | null)[] = [null, null, null, null];
     let totalScore: number | null = null;
 
     for (let r = 1; r <= 4; r++) {
+      // Ineligible entries don't compete in R3/R4
+      if (r >= 3 && !isEligibleWeekend) continue;
       const scores = pickedPlayers.map((p) => getRoundScore(p, r as Round));
       const hasAnyData = scores.some((s) => s !== null);
       if (hasAnyData) {
@@ -56,24 +64,20 @@ export function computeLeaderboard(
       const eligiblePlayers = pickedPlayers
         .filter((p) => p.status !== "cut" && p.status !== "withdrawn" && p.status !== "disqualified")
         .filter((p) => p.total_score !== null);
-      const sorted = [...eligiblePlayers].sort((a, b) => (a.total_score ?? 0) - (b.total_score ?? 0));
-      const counting = sorted.slice(0, playerCount);
-      if (counting.length > 0) {
-        totalScore = counting.reduce((sum, p) => sum + (p.total_score ?? 0), 0);
+      if (isEligibleWeekend) {
+        const sorted = [...eligiblePlayers].sort((a, b) => (a.total_score ?? 0) - (b.total_score ?? 0));
+        const counting = sorted.slice(0, playerCount);
+        if (counting.length > 0) {
+          totalScore = counting.reduce((sum, p) => sum + (p.total_score ?? 0), 0);
+        }
       }
     } else {
-      // sum_of_rounds: sum the per-round best-X totals (Tom's method, default)
+      // sum_of_rounds: sum the per-round best-X totals
       const computed = roundScores.filter((s): s is number => s !== null);
       if (computed.length > 0) {
         totalScore = computed.reduce((a, b) => a + b, 0);
       }
     }
-
-    // Weekend eligibility: X+ players making the cut
-    const madeCut = pickedPlayers.filter(
-      (p) => p.status !== "cut" && p.status !== "withdrawn" && p.status !== "disqualified"
-    ).length;
-    const isEligibleWeekend = madeCut >= pool.cut_rule_minimum;
 
     const pickLabels = Object.entries(entry.picks ?? {})
       .sort(([a], [b]) => Number(a) - Number(b))
@@ -153,8 +157,9 @@ export function computeLeaderboard(
     actualLowRelative.r3 !== null ? "r3" :
     actualLowRelative.r2 !== null ? "r2" : "r1";
 
-  // Sort: total score ASC, then current round's tiebreaker
+  // Sort: eligible entries first, then by total score ASC, then current round's tiebreaker
   rows.sort((a, b) => {
+    if (a.is_eligible_weekend !== b.is_eligible_weekend) return a.is_eligible_weekend ? -1 : 1;
     if (a.total_score === null && b.total_score === null) return 0;
     if (a.total_score === null) return 1;
     if (b.total_score === null) return -1;
@@ -164,6 +169,7 @@ export function computeLeaderboard(
 
   // Assign ranks — same rank only when both tiebreakers also resolve to a tie
   function areTied(a: LeaderboardRow, b: LeaderboardRow): boolean {
+    if (a.is_eligible_weekend !== b.is_eligible_weekend) return false;
     if (a.total_score !== b.total_score) return false;
     return tbCompare(a, b, activeTbRound) === 0;
   }
