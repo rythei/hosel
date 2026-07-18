@@ -104,14 +104,23 @@ function parseCompetitor(c: ESPNCompetitor, allCompetitors: ESPNCompetitor[], pa
   }
 
   if (!cut) {
-    // ESPN uses displayValue="-" with holes=0 as a sentinel for "not playing this round" (cut/WD).
-    // Active players who haven't started R3 yet have a non-"-" displayValue.
-    const r3 = linescores[2];
-    const r3IsSentinel = r3 && (r3.linescores ?? []).length === 0 && r3.displayValue === "-";
-    if (r3IsSentinel) {
+    // ESPN uses displayValue="-" with holes=0 as a sentinel meaning "not playing this round".
+    // Check every linescore: the first sentinel round tells us when the player stopped competing.
+    const firstSentinelRound = linescores.findIndex(
+      (ls) => (ls.linescores ?? []).length === 0 && ls.displayValue === "-"
+    );
+
+    if (firstSentinelRound === 0) {
+      // Sentinel in R1 — withdrew before the tournament started, treat as WD
+      cut = "WD";
+    } else if (firstSentinelRound === 1) {
+      // Sentinel in R2 — withdrew after R1
+      cut = "WD";
+    } else if (firstSentinelRound >= 2) {
+      // Sentinel in R3+ — missed the cut
       cut = "N";
     } else {
-      // Fallback: if anyone is in R3, players with only R1+R2 complete are cut
+      // No sentinel found — use hole-activity fallback for cut detection
       const anyoneInR3 = allCompetitors.some((comp) => {
         const ls3 = (comp.linescores ?? [])[2];
         return ls3 && (ls3.linescores ?? []).length > 0;
