@@ -206,7 +206,12 @@ export function computePayouts(
   const roundPot = Math.floor(totalPot * roundPct);
   const overallPot = Math.floor(totalPot * overallPct);
 
-  // Per-round payouts
+  const roundPayoutAmounts = [splits.first, splits.second, splits.third].map(
+    (pct) => Math.floor(roundPot * pct / 100)
+  );
+  const placementLabels = ["first", "second", "third"];
+
+  // Per-round payouts with tie splitting
   for (let r = 0; r < 4; r++) {
     const category = `round_${r + 1}`;
     const roundRanked = leaderboard
@@ -220,33 +225,41 @@ export function computePayouts(
         return (sa as number) - (sb as number);
       });
 
-    const placements = [
-      { placement: "first", pct: splits.first / 100 },
-      { placement: "second", pct: splits.second / 100 },
-      { placement: "third", pct: splits.third / 100 },
-    ];
-
-    placements.forEach(({ placement, pct }, idx) => {
-      if (roundRanked[idx]) {
+    let pos = 0;
+    while (pos < roundRanked.length && pos < roundPayoutAmounts.length) {
+      const score = roundScoresByEntry[roundRanked[pos].entry_id]?.[r] ?? Infinity;
+      let end = pos;
+      while (
+        end + 1 < roundRanked.length &&
+        (roundScoresByEntry[roundRanked[end + 1].entry_id]?.[r] ?? Infinity) === score
+      ) end++;
+      const slotsUsed = Math.min(end - pos + 1, roundPayoutAmounts.length - pos);
+      const groupTotal = roundPayoutAmounts.slice(pos, pos + slotsUsed).reduce((a, b) => a + b, 0);
+      const share = Math.floor(groupTotal / (end - pos + 1));
+      for (let k = pos; k <= end; k++) {
         payouts.push({
-          user_id: roundRanked[idx].user_id,
+          user_id: roundRanked[k].user_id,
           category,
-          placement,
-          token_amount: Math.floor(roundPot * pct),
+          placement: placementLabels[pos],
+          token_amount: share,
         });
       }
-    });
+      pos = end + 1;
+    }
   }
 
-  // Overall winner
-  const overallWinner = leaderboard[0];
-  if (overallWinner && overallWinner.total_score !== null) {
-    payouts.push({
-      user_id: overallWinner.user_id,
-      category: "overall",
-      placement: "winner",
-      token_amount: overallPot,
-    });
+  // Overall winner - split if tied at rank 1
+  const overallWinners = leaderboard.filter((row) => row.rank === 1 && row.total_score !== null);
+  if (overallWinners.length > 0) {
+    const share = Math.floor(overallPot / overallWinners.length);
+    for (const winner of overallWinners) {
+      payouts.push({
+        user_id: winner.user_id,
+        category: "overall",
+        placement: "winner",
+        token_amount: share,
+      });
+    }
   }
 
   return payouts;

@@ -54,21 +54,41 @@ function computeWinnings(
   const isComplete = (roundNum: number) =>
     tournamentStatus === "complete" || (currentRound !== null && currentRound > roundNum);
 
+  const payoutAmounts = ([splits.first, splits.second, splits.third] as number[]).map(
+    (pct) => Math.floor(roundPot * pct / 100)
+  );
+
   (["r1_score", "r2_score", "r3_score", "r4_score"] as const).forEach((key, i) => {
     if (!isComplete(i + 1)) return; // skip rounds still in progress
     const eligible = rows.filter((r) => r[key] !== null);
     if (eligible.length === 0) return;
     const sorted = [...eligible].sort((a, b) => (a[key] as number) - (b[key] as number));
-    ([splits.first, splits.second, splits.third] as number[]).forEach((pct, idx) => {
-      const entry = sorted[idx];
-      if (entry) winnings[entry.entry_id] = (winnings[entry.entry_id] ?? 0) + Math.floor(roundPot * pct / 100);
-    });
+
+    // Assign payouts with tie splitting: tied entries share the combined payout for their positions
+    let pos = 0;
+    while (pos < sorted.length && pos < payoutAmounts.length) {
+      const score = sorted[pos][key] as number;
+      let end = pos;
+      while (end + 1 < sorted.length && (sorted[end + 1][key] as number) === score) end++;
+      const slotsUsed = Math.min(end - pos + 1, payoutAmounts.length - pos);
+      const groupTotal = payoutAmounts.slice(pos, pos + slotsUsed).reduce((a, b) => a + b, 0);
+      const share = Math.floor(groupTotal / (end - pos + 1));
+      for (let k = pos; k <= end; k++) {
+        winnings[sorted[k].entry_id] = (winnings[sorted[k].entry_id] ?? 0) + share;
+      }
+      pos = end + 1;
+    }
   });
 
-  // Overall winner only shown when tournament is complete
+  // Overall winner - split if tied at rank 1
   if (tournamentStatus === "complete") {
-    const overallWinner = rows.find((r) => r.total_score !== null);
-    if (overallWinner) winnings[overallWinner.entry_id] = (winnings[overallWinner.entry_id] ?? 0) + overallPot;
+    const overallWinners = rows.filter((r) => r.rank === 1 && r.total_score !== null);
+    if (overallWinners.length > 0) {
+      const share = Math.floor(overallPot / overallWinners.length);
+      for (const w of overallWinners) {
+        winnings[w.entry_id] = (winnings[w.entry_id] ?? 0) + share;
+      }
+    }
   }
 
   return winnings;
