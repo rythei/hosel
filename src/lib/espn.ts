@@ -104,9 +104,16 @@ function parseCompetitor(c: ESPNCompetitor, allCompetitors: ESPNCompetitor[], pa
   }
 
   if (!cut) {
-    const anyoneInR3 = allCompetitors.some((comp) => (comp.linescores ?? []).length >= 3);
+    // Check if R3 has actually started (any player has holes played in their 3rd linescore)
+    const anyoneInR3 = allCompetitors.some((comp) => {
+      const ls3 = (comp.linescores ?? [])[2];
+      return ls3 && (ls3.linescores ?? []).length > 0;
+    });
     if (anyoneInR3) {
-      cut = linescores.length >= 3 ? "Y" : linescores.length >= 2 ? "N" : "";
+      // Player made cut if they have holes played in R3 or later; otherwise cut
+      const hasWeekendActivity = linescores.slice(2).some((ls) => (ls.linescores ?? []).length > 0);
+      const hasR2Complete = linescores[1] && (linescores[1].linescores ?? []).length === 18;
+      cut = hasWeekendActivity ? "Y" : hasR2Complete ? "N" : "";
     }
   }
 
