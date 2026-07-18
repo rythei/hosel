@@ -104,16 +104,23 @@ function parseCompetitor(c: ESPNCompetitor, allCompetitors: ESPNCompetitor[], pa
   }
 
   if (!cut) {
-    // Check if R3 has actually started (any player has holes played in their 3rd linescore)
-    const anyoneInR3 = allCompetitors.some((comp) => {
-      const ls3 = (comp.linescores ?? [])[2];
-      return ls3 && (ls3.linescores ?? []).length > 0;
-    });
-    if (anyoneInR3) {
-      // Player made cut if they have holes played in R3 or later; otherwise cut
-      const hasWeekendActivity = linescores.slice(2).some((ls) => (ls.linescores ?? []).length > 0);
-      const hasR2Complete = linescores[1] && (linescores[1].linescores ?? []).length === 18;
-      cut = hasWeekendActivity ? "Y" : hasR2Complete ? "N" : "";
+    // ESPN uses displayValue="-" with holes=0 as a sentinel for "not playing this round" (cut/WD).
+    // Active players who haven't started R3 yet have a non-"-" displayValue.
+    const r3 = linescores[2];
+    const r3IsSentinel = r3 && (r3.linescores ?? []).length === 0 && r3.displayValue === "-";
+    if (r3IsSentinel) {
+      cut = "N";
+    } else {
+      // Fallback: if anyone is in R3, players with only R1+R2 complete are cut
+      const anyoneInR3 = allCompetitors.some((comp) => {
+        const ls3 = (comp.linescores ?? [])[2];
+        return ls3 && (ls3.linescores ?? []).length > 0;
+      });
+      if (anyoneInR3) {
+        const hasWeekendActivity = linescores.slice(2).some((ls) => (ls.linescores ?? []).length > 0);
+        const hasR2Complete = linescores[1] && (linescores[1].linescores ?? []).length === 18;
+        cut = hasWeekendActivity ? "Y" : hasR2Complete ? "N" : "";
+      }
     }
   }
 
