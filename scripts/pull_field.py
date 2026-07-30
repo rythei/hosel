@@ -15,9 +15,9 @@ ESPN event IDs appear in any ESPN golf leaderboard URL:
     https://www.espn.com/golf/leaderboard?event=401580344
                                                    ^^^^^^^^^
 
-The scoreboard is league-scoped, so non-PGA events need --tour
-(pga, lpga, champions-tour, liv, dpwt). Passing the wrong tour is
-detected and reported rather than silently returning another event.
+The scoreboard is league-scoped. By default this script tries every known
+tour (pga, lpga, champions-tour, liv, dpwt) and uses whichever one actually
+has the event — pass --tour to skip straight to one and save a few requests.
 
 Odds (optional): get a free key at https://the-odds-api.com
 Free tier = 500 requests/month, plenty for this use case.
@@ -47,30 +47,55 @@ def _get(url: str) -> dict:
 TOURS = ["pga", "lpga", "champions-tour", "liv", "dpwt"]
 
 
-def fetch_field(event_id: str, tour: str = "pga") -> list[dict]:
+def _fetch_event(event_id: str, tour: str) -> dict | None:
+    """Returns the ESPN event for this tour, or None if this tour doesn't have it.
+
+    ESPN ignores an event ID that isn't in the requested league and returns
+    that league's current event instead, so a returned ID that doesn't match
+    what we asked for means "wrong tour", not "found it".
+    """
     url = (
         f"https://site.api.espn.com/apis/site/v2/sports/golf/{tour}/scoreboard"
         f"?event={event_id}"
     )
-    data = _get(url)
+    try:
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            data = json.load(resp)
+    except Exception:
+        return None
+
+    events = data.get("events") or []
+    if not events:
+        return None
+
+    event = events[0]
+    if str(event.get("id")) != str(event_id):
+        return None
+
+    return event
+
+
+def fetch_field(event_id: str, tour: str | None = None) -> list[dict]:
+    tours_to_try = [tour] if tour else TOURS
+    event = None
+    for t in tours_to_try:
+        event = _fetch_event(event_id, t)
+        if event:
+            print(f"Found event {event_id} on '{t}'.", file=sys.stderr)
+            break
+
+    if not event:
+        tried = tour or ", ".join(TOURS)
+        print(
+            f"Could not find ESPN event {event_id} on: {tried}. Check the event ID.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     try:
-        event = data["events"][0]
         competitors = event["competitions"][0]["competitors"]
     except (KeyError, IndexError):
         print("Could not parse ESPN response — check the event ID.", file=sys.stderr)
-        sys.exit(1)
-
-    # ESPN ignores an event ID that isn't in the requested league and returns
-    # that league's current event instead, so verify we got what we asked for.
-    if str(event.get("id")) != str(event_id):
-        print(
-            f"ESPN returned event {event.get('id')} ({event.get('name')!r}) when asked "
-            f"for {event_id} on the '{tour}' tour.\n"
-            f"That event ID probably belongs to a different tour — try --tour "
-            f"with one of: {', '.join(TOURS)}",
-            file=sys.stderr,
-        )
         sys.exit(1)
 
     players = []
@@ -135,13 +160,13 @@ def main():
         epilog=__doc__,
     )
     parser.add_argument("event_id", help="ESPN event ID (e.g. 401580344)")
-    parser.add_argument("--tour", default="pga", choices=TOURS,
-                        help="ESPN tour the event belongs to (default: pga)")
+    parser.add_argument("--tour", choices=TOURS,
+                        help="ESPN tour the event belongs to (default: auto-detect)")
     parser.add_argument("--odds-api-key", metavar="KEY", help="The Odds API key (optional)")
     parser.add_argument("--output", "-o", metavar="FILE", help="Write to file instead of stdout")
     args = parser.parse_args()
 
-    print(f"Fetching field for ESPN event {args.event_id} ({args.tour})...", file=sys.stderr)
+    print(f"Fetching field for ESPN event {args.event_id}...", file=sys.stderr)
     players = fetch_field(args.event_id, args.tour)
     print(f"Found {len(players)} players.", file=sys.stderr)
 

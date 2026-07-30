@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerClient } from "@/lib/supabase/server";
-import { fetchESPNScores, type ESPNPlayerScore, type Tour } from "@/lib/espn";
+import { fetchESPNScores, type ESPNPlayerScore } from "@/lib/espn";
 import { ADMIN_EMAIL } from "@/lib/admin";
 
 // A player is "done" with a given round if they have a confirmed score,
@@ -46,7 +46,7 @@ async function syncScores(tournamentId?: string) {
   // Find all in-progress tournaments with an ESPN event ID
   let query = supabase
     .from("tournaments")
-    .select("id, external_id, name, par, tour")
+    .select("id, external_id, name, par")
     .not("external_id", "is", null);
 
   // A manual sync targets one tournament regardless of status, so an admin can
@@ -63,10 +63,9 @@ async function syncScores(tournamentId?: string) {
 
   for (const tournament of tournaments) {
     try {
-      const { scores, detectedPar } = await fetchESPNScores(
+      const { scores, detectedPar, tour } = await fetchESPNScores(
         tournament.external_id!,
-        tournament.par ?? 72,
-        (tournament.tour as Tour) ?? "pga"
+        tournament.par ?? 72
       );
 
       let matched = 0;
@@ -112,7 +111,7 @@ async function syncScores(tournamentId?: string) {
 
       results.push({
         tournament: tournament.name,
-        tour: tournament.tour ?? "pga",
+        tour,
         players: scores.length,
         matched,
         // A large unmatched count means our field names disagree with ESPN's.

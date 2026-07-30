@@ -64,11 +64,11 @@ Migrations live in `supabase/migrations/`. Always create a new numbered file (e.
 
 ### Adding a tournament + player field
 
-Insert a row into `tournaments` with `status = 'upcoming'`, `external_id` = the ESPN event ID, and **`tour`** = the ESPN league that event ID belongs to (`pga`, `lpga`, `champions-tour`, `liv`, `dpwt`). Then insert rows into `tournament_players` with `tier` (1–5) and `odds` set. The Create Pool wizard will pick it up automatically.
+Insert a row into `tournaments` with `status = 'upcoming'` and `external_id` = the ESPN event ID. Then insert rows into `tournament_players` with `tier` (1–5) and `odds` set. The Create Pool wizard will pick it up automatically.
 
-⚠️ **`tour` must match the event ID.** ESPN's scoreboard is league-scoped and does *not* 404 on an event ID from another league — it silently returns that league's current event instead. A mismatch therefore syncs a completely different tournament's field, matches zero player names, and leaves the leaderboard blank with no error. The admin UI defaults to `pga`; change it for anything else.
+ℹ️ ESPN's scoreboard endpoint is per-league (`pga`, `lpga`, `champions-tour`, `liv`, `dpwt`) and does *not* 404 on an event ID from another league — it silently returns that league's current event instead. There's no stored `tour` column; `/api/scores` and `pull_field.py` both discover the right league automatically by checking which one actually has the requested event ID.
 
-Pull a field to CSV with `python scripts/pull_field.py <event_id> --tour lpga`.
+Pull a field to CSV with `python scripts/pull_field.py <event_id>` (add `--tour lpga` etc. to skip auto-detection).
 
 Example seed is in `supabase/seed.sql`.
 
@@ -78,7 +78,7 @@ Example seed is in `supabase/seed.sql`.
 - `GET /api/scores` — syncs all `in_progress` tournaments. Protected by `CRON_SECRET`.
 - `POST /api/scores` — syncs one tournament (`{ "tournamentId": "..." }`), any status. Admin-session only; this is what the **Sync scores** button in `/admin` calls.
 
-Fetches the ESPN scoreboard by `external_id` + `tour` and writes scores into `tournament_players`, matching on player `name`.
+Fetches the ESPN scoreboard by `external_id`, auto-detecting which tour (league) it belongs to, and writes scores into `tournament_players`, matching on player `name`.
 
 The response reports `matched` / `unmatched` counts. **`unmatched` should be near zero** — a high count means our stored player names disagree with ESPN's spellings, which silently produces an empty leaderboard. `detectedPar` reports the par derived from the field; a wrong stored `par` is corrected automatically.
 
