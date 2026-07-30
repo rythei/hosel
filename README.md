@@ -1,8 +1,8 @@
 # Hosel.io
 
-Tournament golf pools with your crew. Pick players. Follow the action. Claim the pot.
+Tournament golf pools with your crew. Pick players. Follow the action. Claim the pot. 
 
-🚧 **Status:** Pre-launch — targeting PGA Championship (May 15, 2026) for beta.
+🚧 **Status:** Launched
 
 ## What is this?
 
