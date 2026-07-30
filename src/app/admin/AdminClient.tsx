@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { Tournament, TournamentPlayer, Pool, Tour } from "@/types";
+import type { Tournament, TournamentPlayer, Pool } from "@/types";
 
 interface Props {
   tournaments: Tournament[];
@@ -12,16 +12,6 @@ interface Props {
 }
 
 const STATUS_OPTIONS = ["upcoming", "in_progress", "complete"] as const;
-
-// ESPN scoreboard is league-scoped. An event ID from the wrong tour silently
-// returns that tour's current event instead of erroring, so this must be right.
-const TOUR_OPTIONS: { value: Tour; label: string }[] = [
-  { value: "pga", label: "PGA Tour" },
-  { value: "lpga", label: "LPGA" },
-  { value: "champions-tour", label: "Champions Tour" },
-  { value: "dpwt", label: "DP World Tour" },
-  { value: "liv", label: "LIV Golf" },
-];
 const TIER_LABELS = ["Elite", "Contenders", "Dark Horses", "Sleepers", "Longshots", "Field"];
 const MAX_TIERS = 6;
 
@@ -33,7 +23,6 @@ const blankTournament: {
   end_date: string;
   status: Tournament["status"];
   par: string;
-  tour: Tour;
 } = {
   external_id: "",
   name: "",
@@ -42,7 +31,6 @@ const blankTournament: {
   end_date: "",
   status: "upcoming",
   par: "72",
-  tour: "pga",
 };
 
 const blankPlayer = {
@@ -139,7 +127,6 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
         end_date: tournamentForm.end_date,
         status: tournamentForm.status,
         par: parseInt(tournamentForm.par) || 72,
-        tour: tournamentForm.tour,
         current_round: null,
         cut_line: null,
       })
@@ -185,7 +172,7 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
           ? ` · ${result.unmatched} ESPN players not in our field (${result.unmatchedSample.join(", ")}${result.unmatched > 5 ? "…" : ""})`
           : "";
         setSyncResult(
-          `Synced ${result.matched} of ${result.players} players · round ${result.currentRound}${parNote}${missNote}`
+          `Synced ${result.matched} of ${result.players} players from ${result.tour} · round ${result.currentRound}${parNote}${missNote}`
         );
         router.refresh();
       }
@@ -379,13 +366,7 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
             <div>
               <label style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 4 }}>ESPN EVENT ID</label>
               <input className="input" placeholder="401353230 (for score sync)" value={tournamentForm.external_id} onChange={(e) => setTournamentForm((f) => ({ ...f, external_id: e.target.value }))} />
-            </div>
-            <div>
-              <label style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 4 }}>TOUR</label>
-              <select className="input" value={tournamentForm.tour} onChange={(e) => setTournamentForm((f) => ({ ...f, tour: e.target.value as Tour }))}>
-                {TOUR_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-              </select>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginTop: 4 }}>Must match the tour the event ID is from.</p>
+              <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginTop: 4 }}>Tour (PGA/LPGA/etc.) is auto-detected at sync time.</p>
             </div>
             <div>
               <label style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 4 }}>COURSE PAR</label>
@@ -461,7 +442,7 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
                   <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>{selected.course} · {selected.start_date} – {selected.end_date}</p>
                   {selected.external_id && (
                     <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginTop: 4, fontFamily: "monospace" }}>
-                      ESPN ID: {selected.external_id} · {selected.tour ?? "pga"} · par {selected.par ?? 72}
+                      ESPN ID: {selected.external_id} · par {selected.par ?? 72}
                     </p>
                   )}
                 </div>

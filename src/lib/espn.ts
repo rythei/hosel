@@ -7,10 +7,11 @@ export interface ESPNPlayerScore {
   cut: "Y" | "N" | "WD" | "DQ" | "";
 }
 
-// ESPN league slugs we support. The scoreboard endpoint is league-scoped, and
+// ESPN league slugs we know about. The scoreboard endpoint is league-scoped, and
 // requesting an event ID from the wrong league does NOT error — ESPN ignores the
-// unknown event and returns that league's current event instead. Always pair an
-// external_id with the tour it came from.
+// unknown event and returns that league's current event instead. There is no
+// per-tournament "tour" stored anywhere, so every fetch discovers the right
+// league itself by checking which one actually has the requested event ID.
 export const TOURS = ["pga", "lpga", "champions-tour", "liv", "dpwt"] as const;
 export type Tour = (typeof TOURS)[number];
 
@@ -18,42 +19,58 @@ export interface ESPNFetchResult {
   scores: ESPNPlayerScore[];
   /** Par derived from completed rounds in the field, or null when undeterminable. */
   detectedPar: number | null;
+  /** Which ESPN league actually served this event. */
+  tour: Tour;
 }
 
-export async function fetchESPNScores(
-  eventId: string,
-  par = 72,
-  tour: Tour = "pga"
-): Promise<ESPNFetchResult> {
-  const url = `https://site.api.espn.com/apis/site/v2/sports/golf/${tour}/scoreboard?event=${eventId}`;
-  const res = await fetch(url, { next: { revalidate: 0 } });
+// Tries each known tour's scoreboard endpoint for this event ID and returns the
+// first one whose response actually contains that event (ESPN silently substitutes
+// its current event for an unknown ID rather than 404ing, so this check is what
+// keeps a tour mismatch from looking like a healthy sync of the wrong field).
+export async function fetchESPNScores(eventId: string, par = 72): Promise<ESPNFetchResult> {
+  const attempts = await Promise.allSettled(
+    TOURS.map(async (tour) => ({ tour, event: await fetchEventForTour(eventId, tour) }))
+  );
 
-  if (!res.ok) throw new Error(`ESPN fetch failed: ${res.status} (${tour}/${eventId})`);
+  for (const attempt of attempts) {
+    if (attempt.status !== "fulfilled" || !attempt.value.event) continue;
+    const { tour, event } = attempt.value;
 
-  const json = await res.json();
-  const event = json?.events?.[0];
+    const competitors: ESPNCompetitor[] = event.competitions?.[0]?.competitors ?? [];
+    if (competitors.length === 0) continue;
 
-  if (!event) return { scores: [], detectedPar: null };
+    const detectedPar = detectPar(competitors);
+    const effectivePar = detectedPar ?? par;
 
-  // Guard against the silent-wrong-event failure described above. Without this
-  // check a tour mismatch looks like a healthy sync that quietly matches 0 rows.
-  if (String(event.id) !== String(eventId)) {
-    throw new Error(
-      `ESPN returned event ${event.id} ("${event.name}") when asked for ${eventId} on the "${tour}" tour. ` +
-        `The event ID likely belongs to a different tour.`
-    );
+    return {
+      scores: competitors.map((c) => parseCompetitor(c, competitors, effectivePar)),
+      detectedPar,
+      tour,
+    };
   }
 
-  const competitors: ESPNCompetitor[] = event.competitions?.[0]?.competitors ?? [];
-  if (competitors.length === 0) return { scores: [], detectedPar: null };
+  throw new Error(
+    `ESPN event ${eventId} was not found on any known tour (${TOURS.join(", ")}). ` +
+      `Double-check the event ID.`
+  );
+}
 
-  const detectedPar = detectPar(competitors);
-  const effectivePar = detectedPar ?? par;
+interface ESPNEvent {
+  id?: string | number;
+  name?: string;
+  competitions?: { competitors?: ESPNCompetitor[] }[];
+}
 
-  return {
-    scores: competitors.map((c) => parseCompetitor(c, competitors, effectivePar)),
-    detectedPar,
-  };
+async function fetchEventForTour(eventId: string, tour: Tour): Promise<ESPNEvent | null> {
+  const url = `https://site.api.espn.com/apis/site/v2/sports/golf/${tour}/scoreboard?event=${eventId}`;
+  const res = await fetch(url, { next: { revalidate: 0 } });
+  if (!res.ok) return null;
+
+  const json = await res.json();
+  const event: ESPNEvent | undefined = json?.events?.[0];
+  if (!event || String(event.id) !== String(eventId)) return null;
+
+  return event;
 }
 
 // Derive course par from the field: for any player whose played rounds are all
