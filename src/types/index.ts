@@ -1,3 +1,7 @@
+import type { Tour } from "@/lib/espn";
+
+export type { Tour };
+
 export type PoolStatus =
   | "draft"
   | "open"
@@ -35,6 +39,9 @@ export interface Tournament {
   status: TournamentStatus;
   current_round: number | null;
   cut_line: number | null;
+  par: number;
+  /** ESPN league slug — must match the tour `external_id` belongs to. */
+  tour: Tour;
 }
 
 export interface TournamentPlayer {

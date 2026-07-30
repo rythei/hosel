@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Pull a PGA Tour tournament field from ESPN and output a CSV ready for
+Pull a tournament field from ESPN and output a CSV ready for
 Hosel admin import (player_name, odds, world_ranking).
 
 World ranking is not available from ESPN — the column is left blank for
@@ -8,11 +8,16 @@ you to fill in, or leave empty (the admin page doesn't require it).
 
 Usage:
     python scripts/pull_field.py <espn_event_id>
+    python scripts/pull_field.py <espn_event_id> --tour lpga
     python scripts/pull_field.py <espn_event_id> --odds-api-key <key> -o field.csv
 
 ESPN event IDs appear in any ESPN golf leaderboard URL:
     https://www.espn.com/golf/leaderboard?event=401580344
                                                    ^^^^^^^^^
+
+The scoreboard is league-scoped, so non-PGA events need --tour
+(pga, lpga, champions-tour, liv, dpwt). Passing the wrong tour is
+detected and reported rather than silently returning another event.
 
 Odds (optional): get a free key at https://the-odds-api.com
 Free tier = 500 requests/month, plenty for this use case.
@@ -39,17 +44,33 @@ def _get(url: str) -> dict:
         sys.exit(1)
 
 
-def fetch_field(event_id: str) -> list[dict]:
+TOURS = ["pga", "lpga", "champions-tour", "liv", "dpwt"]
+
+
+def fetch_field(event_id: str, tour: str = "pga") -> list[dict]:
     url = (
-        f"https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard"
+        f"https://site.api.espn.com/apis/site/v2/sports/golf/{tour}/scoreboard"
         f"?event={event_id}"
     )
     data = _get(url)
 
     try:
-        competitors = data["events"][0]["competitions"][0]["competitors"]
+        event = data["events"][0]
+        competitors = event["competitions"][0]["competitors"]
     except (KeyError, IndexError):
         print("Could not parse ESPN response — check the event ID.", file=sys.stderr)
+        sys.exit(1)
+
+    # ESPN ignores an event ID that isn't in the requested league and returns
+    # that league's current event instead, so verify we got what we asked for.
+    if str(event.get("id")) != str(event_id):
+        print(
+            f"ESPN returned event {event.get('id')} ({event.get('name')!r}) when asked "
+            f"for {event_id} on the '{tour}' tour.\n"
+            f"That event ID probably belongs to a different tour — try --tour "
+            f"with one of: {', '.join(TOURS)}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     players = []
@@ -114,12 +135,14 @@ def main():
         epilog=__doc__,
     )
     parser.add_argument("event_id", help="ESPN event ID (e.g. 401580344)")
+    parser.add_argument("--tour", default="pga", choices=TOURS,
+                        help="ESPN tour the event belongs to (default: pga)")
     parser.add_argument("--odds-api-key", metavar="KEY", help="The Odds API key (optional)")
     parser.add_argument("--output", "-o", metavar="FILE", help="Write to file instead of stdout")
     args = parser.parse_args()
 
-    print(f"Fetching field for ESPN event {args.event_id}...", file=sys.stderr)
-    players = fetch_field(args.event_id)
+    print(f"Fetching field for ESPN event {args.event_id} ({args.tour})...", file=sys.stderr)
+    players = fetch_field(args.event_id, args.tour)
     print(f"Found {len(players)} players.", file=sys.stderr)
 
     if args.odds_api_key:
