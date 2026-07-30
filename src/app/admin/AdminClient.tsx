@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { Tournament, TournamentPlayer, Pool } from "@/types";
+import type { Tournament, TournamentPlayer, Pool, Tour } from "@/types";
 
 interface Props {
   tournaments: Tournament[];
@@ -12,6 +12,16 @@ interface Props {
 }
 
 const STATUS_OPTIONS = ["upcoming", "in_progress", "complete"] as const;
+
+// ESPN scoreboard is league-scoped. An event ID from the wrong tour silently
+// returns that tour's current event instead of erroring, so this must be right.
+const TOUR_OPTIONS: { value: Tour; label: string }[] = [
+  { value: "pga", label: "PGA Tour" },
+  { value: "lpga", label: "LPGA" },
+  { value: "champions-tour", label: "Champions Tour" },
+  { value: "dpwt", label: "DP World Tour" },
+  { value: "liv", label: "LIV Golf" },
+];
 const TIER_LABELS = ["Elite", "Contenders", "Dark Horses", "Sleepers", "Longshots", "Field"];
 const MAX_TIERS = 6;
 
@@ -23,6 +33,7 @@ const blankTournament: {
   end_date: string;
   status: Tournament["status"];
   par: string;
+  tour: Tour;
 } = {
   external_id: "",
   name: "",
@@ -31,6 +42,7 @@ const blankTournament: {
   end_date: "",
   status: "upcoming",
   par: "72",
+  tour: "pga",
 };
 
 const blankPlayer = {
@@ -107,6 +119,8 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
   const [importing, setImporting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDeletePoolId, setConfirmDeletePoolId] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState("");
 
   const selected = tournaments.find((t) => t.id === selectedId) ?? null;
   const players = selectedId ? (playersByTournament[selectedId] ?? []) : [];
@@ -125,6 +139,7 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
         end_date: tournamentForm.end_date,
         status: tournamentForm.status,
         par: parseInt(tournamentForm.par) || 72,
+        tour: tournamentForm.tour,
         current_round: null,
         cut_line: null,
       })
@@ -137,6 +152,48 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
     setShowTournamentForm(false);
     setTournamentForm(blankTournament);
     setSaving(false);
+  }
+
+  // The Vercel cron is disabled on the Hobby plan, so this is currently the only
+  // way scores get pulled. Reports matched/unmatched so a tour or name mismatch
+  // is visible instead of looking like a successful no-op.
+  async function syncScores(tournamentId: string) {
+    setSyncing(true);
+    setSyncResult("");
+    setError("");
+    try {
+      const res = await fetch("/api/scores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tournamentId }),
+      });
+      const json = await res.json();
+
+      if (!res.ok) {
+        setError(json.error ?? "Sync failed");
+        return;
+      }
+
+      const result = json.updated?.[0];
+      if (!result) {
+        setSyncResult(json.message ?? "Nothing to sync");
+      } else if (result.error) {
+        setError(result.error);
+      } else {
+        const parNote = result.parUpdated ? ` · par corrected to ${result.detectedPar}` : "";
+        const missNote = result.unmatched > 0
+          ? ` · ${result.unmatched} ESPN players not in our field (${result.unmatchedSample.join(", ")}${result.unmatched > 5 ? "…" : ""})`
+          : "";
+        setSyncResult(
+          `Synced ${result.matched} of ${result.players} players · round ${result.currentRound}${parNote}${missNote}`
+        );
+        router.refresh();
+      }
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setSyncing(false);
+    }
   }
 
   async function updateStatus(tournamentId: string, status: Tournament["status"]) {
@@ -292,6 +349,12 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
         </div>
       )}
 
+      {syncResult && (
+        <div style={{ background: "rgba(52,122,74,0.1)", border: "1px solid rgba(52,122,74,0.3)", borderRadius: "var(--radius-lg)", padding: "10px 14px", marginBottom: 16, color: "var(--green-light)", fontSize: "var(--text-sm)" }}>
+          {syncResult}
+        </div>
+      )}
+
       {/* Add Tournament Form */}
       {showTournamentForm && (
         <div className="card" style={{ marginBottom: 24, padding: 20 }}>
@@ -316,6 +379,13 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
             <div>
               <label style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 4 }}>ESPN EVENT ID</label>
               <input className="input" placeholder="401353230 (for score sync)" value={tournamentForm.external_id} onChange={(e) => setTournamentForm((f) => ({ ...f, external_id: e.target.value }))} />
+            </div>
+            <div>
+              <label style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 4 }}>TOUR</label>
+              <select className="input" value={tournamentForm.tour} onChange={(e) => setTournamentForm((f) => ({ ...f, tour: e.target.value as Tour }))}>
+                {TOUR_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+              <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginTop: 4 }}>Must match the tour the event ID is from.</p>
             </div>
             <div>
               <label style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: 4 }}>COURSE PAR</label>
@@ -390,7 +460,9 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
                   <h2 style={{ fontSize: "var(--text-xl)", fontWeight: 800, color: "var(--cream)", marginBottom: 2 }}>{selected.name}</h2>
                   <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>{selected.course} · {selected.start_date} – {selected.end_date}</p>
                   {selected.external_id && (
-                    <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginTop: 4, fontFamily: "monospace" }}>ESPN ID: {selected.external_id}</p>
+                    <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginTop: 4, fontFamily: "monospace" }}>
+                      ESPN ID: {selected.external_id} · {selected.tour ?? "pga"} · par {selected.par ?? 72}
+                    </p>
                   )}
                 </div>
                 <div style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
@@ -409,6 +481,23 @@ export function AdminClient({ tournaments: initial, playersByTournament: initial
                       {s}
                     </button>
                   ))}
+                  <div style={{ width: 1, height: 20, background: "var(--border)", margin: "0 2px" }} />
+                  <button
+                    onClick={() => syncScores(selected.id)}
+                    disabled={syncing || !selected.external_id}
+                    title={selected.external_id ? "Pull scores from ESPN now" : "Add an ESPN event ID first"}
+                    style={{
+                      fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 99,
+                      cursor: syncing || !selected.external_id ? "not-allowed" : "pointer",
+                      border: "1px solid var(--border)",
+                      background: "var(--surface)",
+                      color: selected.external_id ? "var(--green-light)" : "var(--text-dim)",
+                      opacity: syncing ? 0.6 : 1,
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {syncing ? "Syncing…" : "↻ Sync scores"}
+                  </button>
                   <div style={{ width: 1, height: 20, background: "var(--border)", margin: "0 2px" }} />
                   {!confirmDelete ? (
                     <button

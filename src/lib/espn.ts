@@ -7,22 +7,97 @@ export interface ESPNPlayerScore {
   cut: "Y" | "N" | "WD" | "DQ" | "";
 }
 
-export async function fetchESPNScores(eventId: string, par = 72): Promise<ESPNPlayerScore[]> {
-  const url = `https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard?event=${eventId}`;
+// ESPN league slugs we support. The scoreboard endpoint is league-scoped, and
+// requesting an event ID from the wrong league does NOT error — ESPN ignores the
+// unknown event and returns that league's current event instead. Always pair an
+// external_id with the tour it came from.
+export const TOURS = ["pga", "lpga", "champions-tour", "liv", "dpwt"] as const;
+export type Tour = (typeof TOURS)[number];
+
+export interface ESPNFetchResult {
+  scores: ESPNPlayerScore[];
+  /** Par derived from completed rounds in the field, or null when undeterminable. */
+  detectedPar: number | null;
+}
+
+export async function fetchESPNScores(
+  eventId: string,
+  par = 72,
+  tour: Tour = "pga"
+): Promise<ESPNFetchResult> {
+  const url = `https://site.api.espn.com/apis/site/v2/sports/golf/${tour}/scoreboard?event=${eventId}`;
   const res = await fetch(url, { next: { revalidate: 0 } });
 
-  if (!res.ok) throw new Error(`ESPN fetch failed: ${res.status}`);
+  if (!res.ok) throw new Error(`ESPN fetch failed: ${res.status} (${tour}/${eventId})`);
 
   const json = await res.json();
-  let competitors: ESPNCompetitor[] = [];
+  const event = json?.events?.[0];
 
-  try {
-    competitors = json.events[0].competitions[0].competitors ?? [];
-  } catch {
-    return [];
+  if (!event) return { scores: [], detectedPar: null };
+
+  // Guard against the silent-wrong-event failure described above. Without this
+  // check a tour mismatch looks like a healthy sync that quietly matches 0 rows.
+  if (String(event.id) !== String(eventId)) {
+    throw new Error(
+      `ESPN returned event ${event.id} ("${event.name}") when asked for ${eventId} on the "${tour}" tour. ` +
+        `The event ID likely belongs to a different tour.`
+    );
   }
 
-  return competitors.map((c) => parseCompetitor(c, competitors, par));
+  const competitors: ESPNCompetitor[] = event.competitions?.[0]?.competitors ?? [];
+  if (competitors.length === 0) return { scores: [], detectedPar: null };
+
+  const detectedPar = detectPar(competitors);
+  const effectivePar = detectedPar ?? par;
+
+  return {
+    scores: competitors.map((c) => parseCompetitor(c, competitors, effectivePar)),
+    detectedPar,
+  };
+}
+
+// Derive course par from the field: for any player whose played rounds are all
+// complete, (totalStrokes - toPar) / roundsPlayed === par. Requires consensus
+// across at least 10 players so a stray malformed row can't shift every score.
+function detectPar(competitors: ESPNCompetitor[]): number | null {
+  const tally = new Map<number, number>();
+
+  for (const c of competitors) {
+    const played = (c.linescores ?? []).filter((ls) => (ls.linescores ?? []).length > 0);
+    if (played.length === 0) continue;
+
+    // Any partial round makes the player's total unusable for this calculation.
+    if (played.some((ls) => (ls.linescores ?? []).length !== 18)) continue;
+
+    let strokes = 0;
+    let usable = true;
+    for (const ls of played) {
+      const v = ls.value !== undefined && ls.value !== "" ? Number(ls.value) : NaN;
+      if (!Number.isFinite(v)) { usable = false; break; }
+      strokes += v;
+    }
+    if (!usable) continue;
+
+    const scoreStr = (c.score ?? "").toString().trim();
+    const toPar = scoreStr === "E" ? 0 : parseInt(scoreStr, 10);
+    if (isNaN(toPar)) continue;
+
+    const implied = (strokes - toPar) / played.length;
+    if (!Number.isInteger(implied) || implied < 62 || implied > 78) continue;
+
+    tally.set(implied, (tally.get(implied) ?? 0) + 1);
+  }
+
+  let best: number | null = null;
+  let bestCount = 0;
+  for (const [value, count] of tally) {
+    if (count > bestCount) {
+      best = value;
+      bestCount = count;
+    }
+  }
+
+  return bestCount >= 10 ? best : null;
 }
 
 interface ESPNLinescore {

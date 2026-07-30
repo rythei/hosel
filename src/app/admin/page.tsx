@@ -3,8 +3,7 @@ import { redirect } from "next/navigation";
 import { NavBar } from "@/components/NavBar";
 import { AdminClient } from "./AdminClient";
 import type { Tournament, TournamentPlayer, Pool } from "@/types";
-
-const ADMIN_EMAIL = "ryanctheisen@gmail.com";
+import { ADMIN_EMAIL } from "@/lib/admin";
 
 export default async function AdminPage() {
   const supabase = await createClient();
