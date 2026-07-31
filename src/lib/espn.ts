@@ -55,6 +55,19 @@ export async function fetchESPNScores(eventId: string, par = 72): Promise<ESPNFe
   );
 }
 
+// Player names are our only join key between ESPN and `tournament_players`, and the
+// two disagree on accents, hyphens and spacing for the same person — ESPN's
+// "Julia López Ramirez" / "Minsol Kim" against our "Julia Lopez Ramirez" /
+// "Min-sol Kim". Strip diacritics and every non-alphanumeric so those compare equal.
+// An unmatched player silently scores as null, which is why this is worth the fuzz.
+export function normalizePlayerName(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
 interface ESPNEvent {
   id?: string | number;
   name?: string;
@@ -131,6 +144,22 @@ interface ESPNCompetitor {
   status?: { type?: { name?: string }; displayValue?: string } | string;
 }
 
+// True once the field has finished the given round: somebody posted a complete 18
+// and nobody is still mid-round. Until both hold, a player sitting on zero holes is
+// waiting to tee off rather than out of the tournament — ESPN represents the two
+// states identically (value 0, displayValue "-", no hole scores).
+function roundIsOverForField(allCompetitors: ESPNCompetitor[], roundIdx: number): boolean {
+  let anyComplete = false;
+
+  for (const c of allCompetitors) {
+    const holes = ((c.linescores ?? [])[roundIdx]?.linescores ?? []).length;
+    if (holes === 18) anyComplete = true;
+    else if (holes > 0) return false; // someone is still on the course
+  }
+
+  return anyComplete;
+}
+
 function parseCompetitor(c: ESPNCompetitor, allCompetitors: ESPNCompetitor[], par: number): ESPNPlayerScore {
   const name = c.athlete?.displayName ?? "";
 
@@ -202,12 +231,12 @@ function parseCompetitor(c: ESPNCompetitor, allCompetitors: ESPNCompetitor[], pa
       (ls) => (ls.linescores ?? []).length === 0 && ls.displayValue === "-"
     );
 
-    if (firstSentinelRound === 0) {
-      // Sentinel in R1 — withdrew before the tournament started, treat as WD
-      cut = "WD";
-    } else if (firstSentinelRound === 1) {
-      // Sentinel in R2 — withdrew after R1
-      cut = "WD";
+    if (firstSentinelRound === 0 || firstSentinelRound === 1) {
+      // Sentinel in R1/R2 — withdrew before the tournament started, or after R1.
+      // But ESPN reuses this exact placeholder for a player whose tee time simply
+      // hasn't arrived yet, so it only means "withdrew" once the field is done
+      // with the round. Before that, leave the status alone.
+      if (roundIsOverForField(allCompetitors, firstSentinelRound)) cut = "WD";
     } else if (firstSentinelRound >= 2) {
       // Sentinel in R3+ — missed the cut
       cut = "N";

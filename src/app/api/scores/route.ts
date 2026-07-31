@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerClient } from "@/lib/supabase/server";
-import { fetchESPNScores, type ESPNPlayerScore } from "@/lib/espn";
+import { fetchESPNScores, normalizePlayerName, type ESPNPlayerScore } from "@/lib/espn";
 import { ADMIN_EMAIL } from "@/lib/admin";
 
 // A player is "done" with a given round if they have a confirmed score,
@@ -68,8 +68,25 @@ async function syncScores(tournamentId?: string) {
         tournament.par ?? 72
       );
 
+      // Pull our field once and index it by normalized name, rather than issuing a
+      // name-equality update per ESPN player. Exact matching missed anyone whose
+      // spelling differed by an accent or a hyphen.
+      const { data: fieldRows } = await supabase
+        .from("tournament_players")
+        .select("id, name")
+        .eq("tournament_id", tournament.id);
+
+      const fieldByName = new Map<string, string[]>();
+      for (const row of fieldRows ?? []) {
+        const key = normalizePlayerName(row.name);
+        fieldByName.set(key, [...(fieldByName.get(key) ?? []), row.id]);
+      }
+
       let matched = 0;
       const unmatched: string[] = [];
+      // Two of our players normalizing to the same key would make the target
+      // ambiguous, so those are reported rather than guessed at.
+      const ambiguous: string[] = [];
 
       for (const score of scores) {
         const statusMap: Record<string, string> = {
@@ -80,9 +97,17 @@ async function syncScores(tournamentId?: string) {
           "": "active",
         };
 
-        // `select` on an update returns the affected rows, so a name that doesn't
-        // exist in our field comes back empty instead of failing silently.
-        const { data: updated } = await supabase
+        const targetIds = fieldByName.get(normalizePlayerName(score.name)) ?? [];
+        if (targetIds.length === 0) {
+          unmatched.push(score.name);
+          continue;
+        }
+        if (targetIds.length > 1) {
+          ambiguous.push(score.name);
+          continue;
+        }
+
+        await supabase
           .from("tournament_players")
           .update({
             r1_score: score.roundPars[0],
@@ -91,12 +116,9 @@ async function syncScores(tournamentId?: string) {
             r4_score: score.roundPars[3],
             status: statusMap[score.cut] ?? "active",
           })
-          .eq("tournament_id", tournament.id)
-          .eq("name", score.name)
-          .select("id");
+          .eq("id", targetIds[0]);
 
-        if (updated && updated.length > 0) matched += updated.length;
-        else unmatched.push(score.name);
+        matched++;
       }
 
       // Detect round progression and update the tournament row
@@ -117,6 +139,8 @@ async function syncScores(tournamentId?: string) {
         // A large unmatched count means our field names disagree with ESPN's.
         unmatched: unmatched.length,
         unmatchedSample: unmatched.slice(0, 5),
+        ambiguous: ambiguous.length,
+        ambiguousSample: ambiguous.slice(0, 5),
         detectedPar,
         parUpdated: tournamentUpdate.par !== undefined,
         currentRound,
